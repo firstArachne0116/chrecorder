@@ -53,7 +53,7 @@
                                     <a class="btn btn-primary" v-on:click="importMatrix()"
                                        style="width: 200px; background-color: grey; border-color: grey;">Import (CR)
                                         Matrix</a>
-                                    <a class="btn btn-primary" v-on:click="confirmCollapse();collapsedFlag = true;"
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;"
                                        style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
                                 </div>
                                 <div class="margin-top-10"
@@ -124,7 +124,7 @@
                                     <a class="btn btn-primary" v-on:click="importMatrix()"
                                        style="width: 200px; background-color: grey; border-color: grey;">Import (CR)
                                         Matrix</a>
-                                    <a class="btn btn-primary" v-on:click="confirmCollapse();collapsedFlag = true;"
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;"
                                        style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
                                 </div>
                             </div>
@@ -592,7 +592,8 @@
                                             character.name }}</i>.
                                         </div>
                                         <div v-if="!character.summary">
-                                            Summary function not selected. Categorical characters do not need a summary function.
+                                            Summary function not selected. Categorical characters do not need a summary
+                                            function.
                                         </div>
                                         <div class="modal-footer">
                                             <a class="btn btn-primary ok-btn"
@@ -836,7 +837,7 @@
                                                            v-model="currentColorValue.negation" placeholder=""> -->
                                                     <select style="width: 90px; height: 26px;"
                                                             v-model="currentNonColorValue.negation"
-                                                            v-on:change="changeColorSection(currentNonColorValue, 'negation', $event)">
+                                                            v-on:change="changeNonColorSection(currentNonColorValue, 'negation', $event)">
                                                         <option value=""></option>
                                                         <option value="not">not</option>
                                                     </select>
@@ -1326,7 +1327,7 @@
                                                     </h5>
                                                 </div>
                                             </div>
-                                            <!-- <div v-if="currentNonColorValue.detailFlag == 'negation'"
+                                            <div v-if="currentNonColorValue.detailFlag == 'negation'"
                                                  style="margin-top: 10px;">
                                                 <input type="radio" id="non-not" v-model="currentNonColorValue.negation"
                                                        v-bind:value="'Not'"/> <label for="non-not">Not</label> <br/>
@@ -1334,7 +1335,7 @@
                                                        v-model="currentNonColorValue.negation"
                                                        v-bind:value="''"/> <label for="non-unselect-not">Unselect
                                                 Not</label>
-                                            </div> -->
+                                            </div>
                                             <div v-if="(currentNonColorValue.detailFlag == 'main_value') && nonColorExistFlag"
                                                  style="margin-top: 10px;">
                                                 <!--<input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>-->
@@ -1434,7 +1435,7 @@
                                                    :disabled="saveNonColorButtonFlag"
                                                    v-on:click="saveNonColorValue(true)">
                                                     Save & New </a>
-                                                <a v-on:click="nonColorDetailsFlag = false;currentNonColorValue.main_value='';currentNonColorValue.negation = null;currentNonColorValue.pre_constraint = null;currentNonColorValue.certainty_constraint = null;currentNonColorValue.degree_constraint = null;currentNonColorValue.post_constraint = null;currentNonColorValue.confirmedFlag['main_value'] = false;"
+                                                <a v-on:click="nonColorDetailsFlag = false;"
                                                    class="btn btn-danger">Cancel</a>
                                             </div>
                                         </div>
@@ -1532,35 +1533,6 @@
                                                    v-on:click="confirmRemoveHeader()">
                                                     Remove </a>
                                                 <a v-on:click="toRemoveHeaderConfirmFlag = false"
-                                                   class="btn btn-danger">Cancel</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </transition>
-                </div>
-                <div v-if="toCollapseConfirmFlag" @close="toCollapseConfirmFlag = false">
-                    <transition name="modal">
-                        <div class="modal-mask">
-                            <div class="modal-wrapper">
-                                <div class="modal-container">
-                                    <div class="modal-header">
-                                        Confirmation
-                                    </div>
-                                    <div class="modal-body">
-                                        <div>
-                                            Do you want a matrix with your selected characters be displayed?
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <a class="btn btn-primary ok-btn"
-                                                   v-on:click="toCollapseConfirmFlag=false;generateMatrix()">
-                                                    Yes </a>
-                                                <a v-on:click="toCollapseConfirmFlag = false"
                                                    class="btn btn-danger">Cancel</a>
                                             </div>
                                         </div>
@@ -1759,7 +1731,6 @@
                 toRemoveStandardConfirmFlag: false,
                 toRemoveHeaderId: null,
                 toRemoveHeaderConfirmFlag: false,
-                toCollapseConfirmFlag: false,
                 standardCharactersTags: [
                     'Habit',
                     'Stems',
@@ -2350,6 +2321,7 @@
 
                 if ((app.checkHaveUnit(app.character.name) == true) && (tempViewFlag == false)) {
                     var tempFlag = false;
+                    console.log('sadfsd');
                     await axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + app.character.name)
                         .then(function (resp) {
                             console.log('search term resp', resp.data);
@@ -2885,7 +2857,7 @@
                                         app.showTableForTab(app.character.standard_tag);
 
                                         app.enhanceFlag = false;
-                                        app.detailsFlag = false
+                                        app.detailsFlag = false;
                                     });
                             } else {
                                 alert("The character already exists for this user!!");
@@ -2975,19 +2947,6 @@
 
                     });
                 console.log("app.character", app.character);
-            },
-            confirmCollapse() {
-                var app = this;
-                //alert('');
-                console.log('userTags', app.userTags);
-                console.log('userCharacters', app.userCharacters);
-                console.log('standardCharactersTags', app.standardCharactersTags);
-                console.log(app.userCharacters.find(ch => ch.standard == 1 || !ch.username.includes(app.user.name)));
-                console.log(app.userCharacters.find(ch => ch.standard == 0 && ch.username.includes(app.user.name)));
-                console.log(app.matrixShowFlag);
-                if ((app.userCharacters.find(ch => ch.standard == 1 || !ch.username.includes(app.user.name)) || app.userCharacters.find(ch => ch.standard == 0 && ch.username.includes(app.user.name)))&&!app.matrixShowFlag){
-                    app.toCollapseConfirmFlag = true;
-                }
             },
             generateMatrix() {
                 var app = this;
@@ -3089,7 +3048,7 @@
                                 for (var i=0;i<app.values.length;i++){
                                     for (var j=0;j<app.values[i].length;j++){
                                         if (app.values[i][j].id==value.id){
-                                            app.values[i][j]=resp.data.values[i][j];
+                                            app.values[i][j]=app.data.values[i][j];
                                         }
                                     }
                                 }
@@ -4078,9 +4037,6 @@
             },
             async saveColorValue(newFlag = false) {
                 var app = this;
-                if (app.saveColorButtonFlag){
-                    return;
-                }
 
 
                 var postFlag = true;
@@ -4336,16 +4292,9 @@
             },
             saveNonColorValue(newFlag = false) {
                 var app = this;
-                if (app.saveNonColorButtonFlag){
-                    return;
-                }
 
                 var postFlag = true;
                 app.saveNonColorButtonFlag = true;
-                console.log('app.currentNonColorValue',app.currentNonColorValue);
-                console.log('app.currentNonColorValue.confirmedFlag',app.currentNonColorValue.confirmedFlag);
-                console.log("app.currentNonColorValue['main_value']",app.currentNonColorValue['main_value']);
-                console.log("app.currentNonColorValue.confirmedFlag['main_value']",app.currentNonColorValue.confirmedFlag['main_value']);
                 if (app.currentNonColorValue['main_value'] && app.currentNonColorValue.confirmedFlag['main_value'] == false) {
                     app.saveNonColorButtonFlag = false;
                     app.searchNonColorSelection(app.currentNonColorValue, 'main_value');
@@ -4888,6 +4837,7 @@
                 app.nonColorSearchText = '';
 
                 app.currentNonColorValue.detailsFlag = flag;
+                app.nonColorExistFlag = false;
 
                 var characterId = app.values.find(eachValue => eachValue.find(eachItem => eachItem.id == nonColor.value_id) != null)[0].character_id;
                 var characterName = app.userCharacters.find(ch => ch.id == characterId).name;
@@ -4909,7 +4859,6 @@
 //                }
 
                 if (flag == 'main_value') {
-                    app.currentNonColorValue.confirmedFlag['main_value'] = false;
                     axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText)
                         .then(function (resp) {
                             app.textureTreeData = resp.data;
@@ -4935,6 +4884,7 @@
                             }
                         });
                 } else {
+
                     if (nonColor.id) {
                         app.nonColorDetailId = nonColor.id;
                         for (var i = 0; i < app.nonColorDetails.length; i++) {
@@ -5076,7 +5026,6 @@
                 app.nonColorExistFlag = false;
                 app.defaultNonColorValue = nonColor[flag];
 //                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
-                console.log(nonColor[flag]);
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + nonColor[flag])
                     .then(function (resp) {
                         console.log('search carex resp', resp.data);
@@ -5103,6 +5052,7 @@
                                 return eachValue.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == nonColor[flag])
                                     || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == nonColor[flag])
                                     || (eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == nonColor[flag])) != null || eachValue.term == nonColor[flag];
+
                             });
                             for (var i = 0; i < app.nonColorSynonyms.length; i++) {
                                 if (app.nonColorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115'))) {
@@ -5339,29 +5289,8 @@
                 console.log('app.userCharacters', app.userCharacters);
                 console.log('value', value);
                 app.copyValue = value;
-                var i;
-                for (var i=0;i<app.values.length;i++){
-                    for (var j=0;j<app.values[i].length;j++){
-                        if (parseInt(app.values[i][j].header_id)!=1
-                            && app.values[i][j].character_id==value.character_id
-                            && app.values[i][j].header_id!=value.header_id
-                            && app.values[i][j].value!=''
-                            && app.values[i][j].value!=null){
-                                app.confirmOverwriteFlag = true;
-                                return;
-                        }
-                    }
-                }
-                for (var i=0;i<app.values.length;i++){
-                    for (var j=0;j<app.values[i].length;j++){
-                        if (parseInt(app.values[i][j].header_id)!=1
-                            && app.values[i][j].character_id==value.character_id
-                            && app.values[i][j].header_id!=value.header_id){
-                                app.values[i][j].value=app.copyValue.value;
-                        }
-                    }
-                }
-                this.confirmOverwrite();
+                app.confirmOverwriteFlag = true;
+
             },
             confirmOverwrite() {
                 var app = this;
