@@ -420,12 +420,13 @@ class HomeController extends Controller
 
         $headers = Header::where('user_id', '=', $request->input('user_id'))->get();
 
+        $temp = [];
         foreach ($characters as $eachCharacter) {
             $value = Value::where('character_id', '=', $eachCharacter->id)
                 ->where('header_id', '=', 1)
                 ->first();
             if ($value == null) {
-                Value::create([
+                array_push($temp,[
                     'character_id' => $eachCharacter->id,
                     'header_id' => 1,
                     'value' => $eachCharacter->name,
@@ -437,7 +438,7 @@ class HomeController extends Controller
                     ->where('header_id', '=', $header->id)
                     ->first();
                 if ($value == null) {
-                    Value::create([
+                    array_push($temp,[
                         'character_id' => $eachCharacter->id,
                         'header_id' => $header->id,
                         'value' => '',
@@ -445,6 +446,7 @@ class HomeController extends Controller
                 }
             }
         }
+        Value::insert($temp);
 
         $returnHeaders = $this->getHeaders();
         $returnValues = $this->getValuesByCharacter();
@@ -624,7 +626,14 @@ class HomeController extends Controller
         $username = explode('@', $user['email'])[0];
 
         foreach ($standardCharacters as $eachCharacter) {
-            if (!Character::where('name', '=', $eachCharacter['name'])->where('owner_name', '=', $username)->first()) {
+            if (!Character::where('name', '=', $eachCharacter['name'])
+            ->where('method_from','=',$eachCharacter['method_from'])
+            ->where('method_to','=',$eachCharacter['method_to'])
+            ->where('method_include','=',$eachCharacter['method_include'])
+            ->where('method_exclude','=',$eachCharacter['method_exclude'])
+            ->where('method_where','=',$eachCharacter['method_where'])
+            ->where('owner_name', '=', $username)
+            ->first()) {
                 $character = new Character([
                     'name' => $eachCharacter['name'],
                     'method_from' => $eachCharacter['method_from'],
