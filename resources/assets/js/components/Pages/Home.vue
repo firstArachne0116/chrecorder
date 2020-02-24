@@ -961,7 +961,7 @@
                                                         v-bind:value="''"/> <label for="unselect-not">Unselect
                                                     Not</label>
                                                 </div>
-                                                <div v-if="(currentColorValue.detailFlag == 'brightness'
+                                                <div v-show="(currentColorValue.detailFlag == 'brightness'
                                                 || currentColorValue.detailFlag == 'reflectance'
                                                 || currentColorValue.detailFlag == 'saturation'
                                                 || currentColorValue.detailFlag == 'colored'
@@ -1336,7 +1336,7 @@
                                                         v-bind:value="''"/> <label for="non-unselect-not">Unselect
                                                     Not</label>
                                                 </div> -->
-                                                <div v-if="(currentNonColorValue.detailFlag == 'main_value') && nonColorExistFlag"
+                                                <div v-show="(currentNonColorValue.detailFlag == 'main_value') && nonColorExistFlag"
                                                     style="margin-top: 10px;">
                                                     <!--<input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>-->
                                                     <tree
@@ -1641,6 +1641,7 @@
                 },
                 isLoading: false,
                 userTags: [],
+                oldUserTags: [],
                 currentTab: '',
                 descriptionText: '',
                 descriptionFlag: false,
@@ -1769,7 +1770,8 @@
                     'Inflorescence units',
                     'Perigynia',
                     'Pistillate scales',
-                    'Achenes'
+                    'Achenes',
+                    'Anthers',
                 ],
                 saveColorButtonFlag: false,
                 saveNonColorButtonFlag: false,
@@ -1835,11 +1837,11 @@
                 var app = this;
                 var selectedCharacter = app.defaultCharacters.find(ch => ch.id == selectedItem)
 
-                if (!selectedCharacter) {
-                    selectedCharacter = app.userCharacters.find(ch => ch.id == selectedItem);
-                } else if (app.userCharacters.find(ch => ch.name == selectedCharacter.name)) {
-                    selectedCharacter = app.userCharacters.find(ch => ch.name == selectedCharacter.name && ch.username == selectedCharacter.username);
-                }
+                // if (!selectedCharacter) {
+                //     selectedCharacter = app.userCharacters.find(ch => ch.id == selectedItem);
+                // } else if (app.userCharacters.find(ch => ch.name == selectedCharacter.name)) {
+                //     selectedCharacter = app.userCharacters.find(ch => ch.name == selectedCharacter.name && ch.username == selectedCharacter.username);
+                // }
                 if (!selectedCharacter) {
                     app.firstCharacter = '';
                     app.middleCharacter = '';
@@ -2189,7 +2191,7 @@
             },
             showStandardCharacters() {
                 var app = this;
-                app.isLoading = true;
+                // app.isLoading = true;
                 app.standardShowFlag = !app.standardShowFlag;
                 console.log('test', app.userCharacters);
                 console.log('test1', app.defaultCharacters);
@@ -2227,6 +2229,7 @@
                         app.userCharacters = resp.data;
                         app.isLoading = false;
                         app.refreshUserCharacters();
+                        app.showTableForTab(app.currentTab);
                     });
             },
             removeStandardCharacter(characterId) {
@@ -2268,8 +2271,10 @@
                             app.userTags = resp.data.userTags;
                             app.showTableForTab(app.userTags[0].tag_name);
                         }
+                        else app.showTableForTab(app.currentTab);
                         
                     });
+
             },
             removeUserCharacter(characterId) {
                 var app = this;
@@ -2293,15 +2298,16 @@
                             axios.post("/chrecorder/public/api/v1/user-tag/remove", jsonUserTag)
                                 .then(function (resp) {
                                     console.log("remove UserTag", resp.data);
+                                    app.showTableForTab(app.currentTab);
                                 });
                         }
                         app.refreshUserCharacters();
-
+                        app.showTableForTab(app.currentTab);
                     });
             },
             removeAllCharacters() {
                 var app = this;
-                app.isLoading = true;
+                // app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/character/remove-all')
                     .then(function (resp) {
                         app.isLoading = false;
@@ -2312,6 +2318,7 @@
                             app.matrixShowFlag = false;
                         }
                         app.refreshUserCharacters();
+                        app.showTableForTab(app.currentTab);
                     });
             },
 
@@ -2739,7 +2746,13 @@
                 app.character = app.userCharacters.find(ch => ch.id == characterId);
                 if (!app.character) {
                     app.character = app.defaultCharacters.find(ch => ch.id == characterId);
-                    if (!app.userCharacters.find(ch => ch.name == app.character.name)) {
+                    if (!app.userCharacters.find(ch => ch.name == app.character.name
+                      && ch.method_from == app.character.method_from
+                      && ch.method_to == app.character.method_to
+                      && ch.method_include == app.character.method_include
+                      && ch.method_exclude == app.character.method_exclude
+                      && ch.method_where == app.character.method_where
+                     )) {
                         console.log('app.character', app.character);
 //                app.character.show_flag = false;
                         //app.character.standard = 1;
@@ -2776,9 +2789,11 @@
                             app.showDetails('unit', app.metadataFlag);
                         }
                     } else {
+                        alert("The character already exists for this user!!");
                         app.detailsFlag = false;
                     }
                 } else {
+                    alert("The character already exists for this user!!");
                     app.detailsFlag = false;
                 }
 
@@ -2856,7 +2871,12 @@
                         var currentCharacters = resp.data.characters;
 //                        app.character.standard = 0;
 //                        app.character.username = app.characterUsername;
-                        if (currentCharacters.find(ch => ch.name == app.character.name)) {
+                        if (currentCharacters.find(ch => ch.name == app.character.name
+                            && ch.method_from == app.character.method_from
+                            && ch.method_to == app.character.method_to
+                            && ch.method_include == app.character.method_include
+                            && ch.method_exclude == app.character.method_exclude
+                            && ch.method_where == app.character.method_where)) {
                             if (app.editFlag || app.enhanceFlag) {
                                 if (app.character.standard_tag == app.currentTab) {
                                     app.character.show_flag = true;
@@ -2955,6 +2975,7 @@
 
                                         app.enhanceFlag = false;
                                         app.detailsFlag = false;
+                                        app.showTableForTab(app.currentTab);
                                     });
                             } else {
                                 axios.post("/chrecorder/public/api/v1/character/create", app.character)
@@ -2977,6 +2998,7 @@
 
 
                                         app.detailsFlag = false;
+                                        app.showTableForTab(app.currentTab);
                                     });
                             }
                         }
@@ -2999,13 +3021,14 @@
             },
             generateMatrix() {
                 var app = this;
-                app.isLoading = true;
+                // app.isLoading = true;
                 if ((isNaN(app.columnCount) == false) && app.columnCount > 0 && app.taxonName != "") {
                     var jsonMatrix = {
                         'user_id': app.user.id,
                         'column_count': app.columnCount,
                         'taxon': app.taxonName
                     };
+                    app.oldUserTags = [];
                     axios.post('/chrecorder/public/api/v1/matrix-store', jsonMatrix)
                         .then(function (resp) {
                             app.isLoading = false;
@@ -3019,7 +3042,7 @@
                             axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
                                 .then(function (resp) {
                                     app.userTags = resp.data;
-                                    app.showTableForTab(app.userTags[0].tag_name);
+                                    app.showTableForTab(app.currentTab);
                                 });
                             app.refreshUserCharacters(true);
 
@@ -3039,7 +3062,7 @@
             },
             confirmRemoveHeader() {
                 var app = this;
-                app.isLoading = true;
+                // app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/delete-header/' + app.toRemoveHeaderId)
                     .then(function (resp) {
                         console.log('delete header', resp.data);
@@ -3050,6 +3073,7 @@
                         app.isLoading = false;
                         app.toRemoveHeaderConfirmFlag = false;
                         app.refreshUserCharacters();
+                        app.showTableForTab(app.currentTab);
 
                     });
             },
@@ -3062,23 +3086,14 @@
             },
             changeColumnCount() {
                 var app = this;
-                app.isLoading = true;
                 if (app.columnCount < app.headers.length - 1) {
                     app.columnCount = app.headers.length - 1;
                     app.isLoading = false;
                     alert("To reduce the size of the matrix, use the remove button (x) in the matrix.");
-                } else {
-                    axios.post('/chrecorder/public/api/v1/add-more-column/' + app.columnCount)
-                        .then(function (resp) {
-                            console.log('addMoreColumn resp', resp.data);
-                            app.userCharacters = resp.data.characters;
-                            app.headers = resp.data.headers;
-                            app.values = resp.data.values;
-                            app.taxonName = resp.data.taxon;
-                            app.isLoading = false;
-                            app.refreshUserCharacters();
-
-                        });
+                } else if (app.columnCount == app.headers.length -1) {
+                }
+                else {
+                    app.generateMatrix();
                 }
             },
             saveItem(event, value) {
@@ -3105,6 +3120,7 @@
                                 app.defaultCharacters = resp.data.defaultCharacters;
                                 app.refreshUserCharacters();
                                 app.refreshDefaultCharacters();
+                                app.showTableForTab(app.currentTab);
                             }
                         });
                 }
@@ -3113,8 +3129,8 @@
             },
             removeAllStandardCharacters() {
                 var app = this;
-                app.isLoading = true;
-                axios.post('/chrecorder/public/api/v1/character/remove-all-standard')
+                // app.isLoading = true;
+                axios.get('/chrecorder/public/api/v1/character/remove-all-standard')
                     .then(function (resp) {
                         app.removeAllStandardFlag = false;
                         app.isLoading = false;
@@ -3125,7 +3141,9 @@
                         if (app.userCharacters.length == 0) {
                             app.matrixShowFlag = false;
                         }
+                        console.log('delTags',resp.data.delTags);
                         app.refreshUserCharacters();
+                        app.showTableForTab(app.currentTab);
                     });
             },
             refreshUserCharacters (showTabFlag = false) {
@@ -3150,10 +3168,28 @@
                 }
                 app.characterUsername = app.user.name;
             },
+            tagOrder(tag){
+                var app = this;
+                for (var i=0;i<app.standardCharactersTags.length;i++){
+                    if (app.standardCharactersTags[i] == tag.tag_name){
+                        return i;
+                    }
+                }
+                return 10000;
+            },
             showTableForTab(tagName) {
                 var app = this;
-                app.isLoading = true;
+                // app.isLoading = true;
+                if (!app.userTags.find(tag => tag.tag_name == tagName)){
+                    tagName = app.userTags[0].tag_name;
+                }
                 app.currentTab = tagName;
+                if (app.oldUserTags.length!=app.userTags.length){
+                    app.userTags.sort((a,b) => app.tagOrder(a)-app.tagOrder(b));
+                    app.oldUserTags = app.userTags;
+                }
+
+
                 for (var i=0;i<app.userCharacters.length;i++){
                     app.userCharacters[i].show_flag = app.userCharacters[i].standard_tag == app.currentTab;
                 }
@@ -3211,6 +3247,7 @@
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
                         app.refreshUserCharacters();
+                        app.showTableForTab(app.currentTab);
                     });
             },
             changeSummary(characterId, summary) {
@@ -3226,6 +3263,7 @@
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
                         app.refreshUserCharacters();
+                        app.showTableForTab(app.currentTab);
                     });
             },
             upUserValue(valueId) {
@@ -3249,7 +3287,7 @@
                 var valueIndex = showedValues.indexOf(app.values.find(value => value[0].character_id == valueId));
                 if ((directionFlag == true) && (valueIndex < maxLength - 1)) {
                     var tmp = showedValues[valueIndex];
-                    app.isLoading = true;
+                    // app.isLoading = true;
                     console.log('tmp', tmp);
 //                    app.values.splice(valueIndex, 1);
 //                    app.values.splice(valueIndex + 1, 0, tmp);
@@ -3264,10 +3302,11 @@
                             app.userCharacters = resp.data.characters;
                             console.log('app.userCharacters', app.userCharacters);
                             app.refreshUserCharacters();
+                            app.showTableForTab(app.currentTab);
                         });
                 } else if ((directionFlag == false) && (valueIndex > 0)) {
                     var tmp = showedValues[valueIndex];
-                    app.isLoading = true;
+                    // app.isLoading = true;
 //                    app.values.splice(valueIndex, 1);
 //                    app.values.splice(valueIndex - 1, 0, tmp);
                     axios.post('/chrecorder/public/api/v1/character/change-order', {
@@ -3275,10 +3314,11 @@
                         characterId: tmp[0].character_id,
                     })
                         .then(function (resp) {
-                            app.isLoading = false;
+                            // app.isLoading = false;
                             app.values = resp.data.values;
                             app.userCharacters = resp.data.characters;
                             app.refreshUserCharacters();
+                            app.showTableForTab(app.currentTab);
                         });
                 }
 
@@ -5393,6 +5433,7 @@
             },
             calcSummary(row) {
                 var app = this;
+                console.log('row',row);
 
                 var characterName = row.find(each => each.header_id == 1).value;
                 if (app.checkNumericalCharacter(characterName)) {
@@ -5474,6 +5515,7 @@
                     }
                     console.log('app.colorationData', app.colorationData);
                 });
+            console.log('standard_characters');
             axios.get('/chrecorder/public/api/v1/standard_characters')
                 .then(function (resp) {
                     console.log('standardCharacters', resp);
@@ -5505,6 +5547,7 @@
                         }
                         app.standardCharacters.push(temp);
                     }
+                    console.log('v1/character');
                     axios.get("/chrecorder/public/api/v1/character/" + app.user.id)
                         .then(function (resp) {
                             console.log('resp character', resp.data);
@@ -5524,18 +5567,21 @@
                                 if (app.values.find(value => value.header_id != 1).length != 0) {
                                     app.matrixShowFlag = true;
                                     app.collapsedFlag = true;
-                                    app.showTableForTab(app.userTags[0].tag_name);
 
                                 }
                             }
 
                             app.refreshUserCharacters();
+                            if (app.currentTab!='')
+                                app.showTableForTab(app.currentTab);
                         });
                 });
 
             axios.get("/chrecorder/public/api/v1/user-tag/" + app.user.id)
                 .then(function (resp) {
+                    resp.data.sort((a,b) => app.tagOrder(a)-app.tagOrder(b));
                     app.userTags = resp.data;
+                    app.showTableForTab(app.userTags[0].tag_name);
                     console.log('userTags', app.userTags);
                 });
         },
