@@ -371,20 +371,20 @@
                     logicDefinition: ''
                 };
 
+                app.greenTick[app.currentSetting] = true;
+                app.formViewFlag[app.currentSetting] = false;
+                app.needMoreGreen[app.currentSetting] = true;
+                app.newTermDefinition = null;
                 axios.post('http://shark.sbs.arizona.edu:8080/class', jsonRequest)
                     .then(function (resp) {
                         console.log('class resp', resp);
-                        app.greenTick[app.currentSetting] = true;
-                        app.formViewFlag[app.currentSetting] = false;
-                        app.needMoreGreen[app.currentSetting] = true;
-                        app.modalFlag = false;
-                        app.newTermDefinition = null;
                         axios.post('http://shark.sbs.arizona.edu:8080/save', {"user": app.sharedFlag? '': app.childData[3].name, "ontology": 'carex'})
                             .then(function (resp) {
                                 console.log('save resp', resp);
                             });
 
                     });
+                app.modalFlag = false;
             },
             addSynonym: function (setting, value) {
                 var app = this;
