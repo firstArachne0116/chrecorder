@@ -1729,7 +1729,7 @@ class HomeController extends Controller
             $colorDetails = ColorDetails::where('value_id', '=', $selectedValue->id)->get();
             if ($colorDetails) {
                 foreach ($values as $eachValue) {
-                    if ($eachValue->id != $value['id']) {
+                    if ($eachValue->id != $value['id'] && $eachValue->header_id != 1) {
                         ColorDetails::where('value_id', '=', $eachValue->id)->delete();
                         foreach ($colorDetails as $eachColorDetails) {
                             $otherColorDetail = new ColorDetails([
@@ -1753,7 +1753,7 @@ class HomeController extends Controller
             $nonColorDetails = NonColorDetails::where('value_id', '=', $selectedValue->id)->get();
             if ($nonColorDetails) {
                 foreach ($values as $eachValue) {
-                    if ($eachValue->id != $value['id']) {
+                    if ($eachValue->id != $value['id'] && $eachValue->header_id != 1) {
                         NonColorDetails::where('value_id', '=', $eachValue->id)->delete();
                         foreach ($nonColorDetails as $eachNonColorDetails) {
                             $otherNonColorDetail = new NonColorDetails([

@@ -139,7 +139,7 @@
                                     <input v-model="columnCount" v-on:keyup.enter="changeColumnCount()"
                                            v-on:blur="changeColumnCount()"
                                            style="width: 40px; margin-left: 30px; line-height: 38px; border:none;">
-                                    Specimens
+                                    Samples
                                 </div>
                                 <div class="col-md-5">
                                     <model-select :options="standardCharacters"
@@ -395,7 +395,7 @@
                                                         <ul style="margin-left: auto; margin-right: auto;">
                                                             <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
                                                             <li class="method"
-                                                                v-bind:class="{'back-grey': !checkHaveUnit(character.name) || editFlag}">
+                                                                v-bind:class="{'back-grey': !checkHaveUnit(character.name)}">
                                                                 <a
                                                                         :disabled="(!checkHaveUnit(character.name) || editFlag)"
                                                                         v-on:click="showDetails('method', metadataFlag)">1.
@@ -842,7 +842,7 @@
                                                             style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
                                                             v-model="currentColorValue.negation" placeholder=""> -->
                                                         <select style="width: 90px; height: 26px;"
-                                                                v-model="currentNonColorValue.negation"
+                                                                v-model="currentColorValue.negation"
                                                                 v-on:change="changeColorSection(currentNonColorValue, 'negation', $event)">
                                                             <option value=""></option>
                                                             <option value="not">not</option>
@@ -993,12 +993,12 @@
                                                 || currentColorValue.detailFlag == 'colored'
                                                 || currentColorValue.detailFlag == 'multi_colored') && !colorExistFlag"
                                                     style="margin-top: 10px;">
-
                                                     <div v-for="flag in colorFlags" v-if="colorSynonyms[flag]" :key="flag">
-                                                        <big>{{flag}}</big>
+                                                        <big>{{flag}} : {{originColorValue[flag]}}</big>
+                                                        <br>
+                                                        <b>Did you mean?</b>
                                                         <div style="margin-left:20px">
                                                             <div v-for="eachSynonym in colorSynonyms[flag]">
-                                                                <b>Did you mean?</b>
                                                                 <input type="radio" v-bind:id="eachSynonym.term"
                                                                     v-bind:value="eachSynonym.term"
                                                                     v-on:change="selectedSynonymForColor(flag)"
@@ -1037,32 +1037,6 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div v-if="searchColorFlag == 2">
-                                                        Did you mean <b>{{ exactColor.term }}</b>?<br/>
-                                                        Definition of <b> {{ exactColor.term }} </b>: <input
-                                                            v-model="colorDefinition[currentColorValue.detailFlag]"
-                                                            style="width: 70%;">
-                                                        <!--Hong modified this: Did you mean <b>{{ exactColor.term }}</b>?<br/>
-                                                        Current Definition: <input
-                                                            v-model="app.exactColor.definition"
-                                                            style="width: 70%;">   -->
-                                                        <br/><br/>If definition is lacking, you can propose or edit the
-                                                        definition above. <br/>
-
-
-                                                    </div>
-                                                    <!-- <div v-if="searchColorFlag !=2"
-                                                        v-for="(eachOption, index) in extraColors">
-                                                        <input type="radio"
-                                                            v-bind:id="'extra-option-' + index"
-                                                            value=""
-                                                            v-on:change="selectExtraOption(eachOption.flag, eachOption.value, currentColorValue.detailFlag)"
-                                                            v-model="currentColorValue[currentColorValue.detailFlag]">
-                                                        <label v-bind:for="'extra-option-' + index">{{ eachOption.value }}
-                                                            describes {{ changeFlagToLabel(eachOption.flag) }}, move {{
-                                                            eachOption.value }} to {{ changeFlagToLabel(eachOption.flag)
-                                                            }}</label>
-                                                    </div> -->
                                                     
                                                 </div>
                                             </div>
@@ -1360,10 +1334,10 @@
                                                 </div>
                                                 <div v-if="(currentNonColorValue.detailFlag == 'main_value') && !nonColorExistFlag"
                                                     style="margin-top: 10px;">
+                                                    <b>Did you mean? </b>
 
                                                     <div v-if="searchNonColorFlag == 1">
                                                         <div v-for="eachSynonym in nonColorSynonyms">
-                                                            <b>Did you mean? </b>
                                                             <input type="radio" v-bind:id="eachSynonym.term"
                                                                 v-bind:value="eachSynonym.term"
                                                                 v-model="currentNonColorValue[currentNonColorValue.detailFlag]">
@@ -1381,15 +1355,6 @@
                                                             </div> -->
                                                         </div>
                                                     </div>
-                                                    <!-- <div v-if="searchNonColorFlag == 2">
-                                                        Did you mean <b>{{ exactNonColor.term }}</b>?<br/>
-                                                        Definition of <b> {{ exactNonColor.term }} </b>: <input
-                                                            v-model="nonColorDefinition[currentNonColorValue.detailFlag]"
-                                                            style="width: 70%;">
-                                                        <br/><br/>If definition is lacking, you can propose or edit the
-                                                        definition above. <br/>
-
-                                                    </div> -->
                                                     <div v-if="searchNonColorFlag !=2 ">
                                                         <input type="radio" id="non-user-defined"
                                                             v-bind:value="defaultNonColorValue"
@@ -1666,6 +1631,12 @@
                     multiple: true,
                     autoCheckChildren: false,
                     parentSelect: false,
+                    filter: {
+                        matcher(query, node) {
+                            return node.data.text.startsWith(query);
+                        },
+                        showChildren: true
+                    }
                 },
                 colorExistFlag: false,
                 searchColor: [],
@@ -1676,6 +1647,7 @@
                 exactColor: {},
                 colorDetailId: null,
                 defaultColorValue: [],
+                originColorValue: [],
                 colorComment: {},
                 colorTaxon: {},
                 colorSampleText: {},
@@ -1852,6 +1824,7 @@
                 //     selectedCharacter = app.userCharacters.find(ch => ch.name == selectedCharacter.name && ch.username == selectedCharacter.username);
                 // }
                 app.editFlag = false;
+                sessionStorage.setItem('editFlag', false);
                 if (!selectedCharacter) {
                     app.firstCharacter = '';
                     app.middleCharacter = '';
@@ -1889,6 +1862,7 @@
                     app.viewFlag = !editFlag;
                     sessionStorage.setItem('viewFlag', !editFlag);
                     sessionStorage.setItem('edit_created_other', !editFlag);
+                    sessionStorage.setItem('editFlag', editFlag);
                     app.character = app.userCharacters.find(ch => ch.id == character.character_id);
 //                    app.character.standard = 0;
                 } else {
@@ -1902,6 +1876,7 @@
                     app.editFlag = false;
                     app.viewFlag = true;
                     sessionStorage.setItem('viewFlag', true);
+                    sessionStorage.setItem('editFlag', editFlag);
                     sessionStorage.setItem('edit_created_other', true);
                 }
                 app.item = app.character.id;
@@ -1984,7 +1959,7 @@
                             break;
                     }
                 } else {
-                    if (app.checkHaveUnit(app.character.name) && !editFlag) {
+                    if (app.checkHaveUnit(app.character.name)) {
                         // Initializing the methodFieldData //
                         app.methodFieldData.fromTerm = null;
                         app.methodFieldData.fromId = null;
@@ -2026,19 +2001,12 @@
                         app.metadataFlag = 'method';
                         app.currentMetadata = method;
                     }
-                    else if (app.checkHaveUnit(app.character.name)){
-                        app.parentData = app.character.unit;
-                        app.currentMetadata = unit;
-                        app.metadataFlag = 'unit';
-                    }
                     else {
                         app.parentData = app.character.standard_tag;
                         app.metadataFlag = 'tag';
                         app.currentMetadata = tag;
                     }
-
                 }
-
                 app.detailsFlag = true;
             },
             checkStoreCharacter() {
@@ -2154,7 +2122,7 @@
 
                 console.log('metadata', metadata);
                 console.log("app.character=", app.character);
-                if (( app.checkHaveUnit(app.character.name) && (metadata!='method' || !app.editFlag )) || ( metadata != 'method' && metadata != 'unit' )) {
+                if (( app.checkHaveUnit(app.character.name)) || ( metadata != 'method' && metadata != 'unit' )) {
                     app.metadataFlag = metadata;
                     switch (metadata) {
                         case 'method':
@@ -2910,6 +2878,7 @@
                 app.detailsFlag = false;
                 sessionStorage.setItem('viewFlag', false);
                 sessionStorage.setItem('edit_created_other', false);
+                sessionStorage.setItem('editFlag', false);
                 app.viewFlag = false;
                 app.enhanceFlag = true;
                 setTimeout(function () {
@@ -3479,6 +3448,7 @@
                 app.descriptionText = '';
 
                 for (var i = 0; i < app.userTags.length; i++) {
+                    var char_names = [];
                     app.descriptionText += '<b>' + app.userTags[i].tag_name + ': ' + '</b>';
                     var filteredCharacters = app.userCharacters.filter(function (eachCharacter) {
                         return eachCharacter.standard_tag == app.userTags[i].tag_name;
@@ -3494,6 +3464,14 @@
                             }
                         }
                         if (app.checkValueArray(tempValueArray)) {
+                            
+                            var currentCharacter = app.userCharacters.find(ch => ch.id == filteredValues[0].character_id);
+                            var char_name = currentCharacter.name.split(' of ')[1].toLowerCase().split(' in ')[0];
+                            if (char_name != currentCharacter.standard_tag.toLowerCase() && !char_names.find(ch => ch.includes(char_name))) {
+                                char_names.push(char_name);
+                                app.descriptionText += currentCharacter.name.split(' of ')[1].charAt(0).toUpperCase() + currentCharacter.name.split(' of ')[1].slice(1) + ' ';
+                            }
+                            
                             if (app.checkHaveUnit(filteredCharacters[j].name)) {
                                 switch (filteredCharacters[j].summary) {
                                     case "range-percentile":
@@ -3528,6 +3506,11 @@
                                             app.descriptionText += minValue;
                                         } else {
                                             app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ';
+                                            // app.descriptionText += minPercentileValue + '-' + maxPercentileValue;
+                                        }
+
+                                        if (filteredCharacters[j].unit) {
+                                            app.descriptionText += ' ' + filteredCharacters[j].unit
                                         }
 
                                         break;
@@ -3561,7 +3544,7 @@
                                         var avg = parseFloat(sum / arrayLength).toFixed(1);
                                         app.descriptionText += avg;
                                         if (filteredCharacters[j].unit) {
-                                            app.descriptionText += filteredCharacters[j].unit
+                                            app.descriptionText += ' ' + filteredCharacters[j].unit
                                         }
                                         break;
                                     default:
@@ -3576,15 +3559,11 @@
                                     app.descriptionText += ' tall; ';
 
                                 } else if (filteredCharacters[j].name.startsWith('Diameter')) {
-                                    app.descriptionText += ' diameter; ';
+                                    app.descriptionText += ' in diameter; ';
                                 } else {
                                     app.descriptionText += ' ; ';
                                 }
                             } else {
-                                var currentCharacter = app.userCharacters.find(ch => ch.id == filteredValues[0].character_id);
-                                if (currentCharacter.name.split(' of ')[1].toLowerCase() != currentCharacter.standard_tag.toLowerCase) {
-                                    app.descriptionText += currentCharacter.name.split(' of ')[1].charAt(0).toUpperCase() + currentCharacter.name.split(' of ')[1].slice(1) + ' ';
-                                }
                                 if (currentCharacter.name.split(' of ')[0] == 'Color') {
                                     var checkValueIdArray = [];
                                     for (var k = 0; k < filteredValues.length; k++) {
@@ -3593,14 +3572,10 @@
                                         }
                                     }
 
-//                                    console.log('get-color-values', resp.data);
                                     var colorValues = app.allColorValues.filter(eachValue => checkValueIdArray.includes(eachValue.value_id));
                                     var objColorValues = {
                                         'empty': []
                                     };
-//                                    var cloneObjColor = {
-//                                        'empty': []
-//                                    };
                                     var arraySortedColor = [];
                                     var cloneSortedColor = [];
                                     for (var l = 0; l < colorValues.length; l++) {
@@ -3689,28 +3664,7 @@
                                             }).length;
                                         }
                                         objColorValues[objKey] = app.sortColorValue(objColorValues[objKey]);
-//                                        cloneObjColor[objKey] = app.sortColorValue(objColorValues[objKey]);
-//                                        for (var l = 0; l < objColorValues[objKey].length; l++) {
-//                                            if (objColorValues[objKey][l].count > 1) {
-//                                                var tempArray = objColorValues[objKey].filter(function(each) {
-//                                                    if (objColorValues[objKey][l].multi_colored != null && objColorValues[objKey][l].multi_colored != '') {
-//                                                        return (each.value.endsWith(objColorValues[objKey][l].value)) && (each.value != objColorValues[objKey][l].value);
-//                                                    } else {
-//                                                        if (each.multi_colored != null && each.multi_colored != '') {
-//                                                            return each.value.substring(0, each.value.length - (each.multi_colored.length + 1)).endsWith(objColorValues[objKey][l].value)  && each.value != objColorValues[objKey][l].value;
-//                                                        } else {
-//                                                            return (each.value.endsWith(objColorValues[objKey][l].value)) && (each.value != objColorValues[objKey][l].value);
-//                                                        }
-//                                                    }
-//                                                });
-//                                                cloneObjColor[objKey] = cloneObjColor[objKey].filter( function( el ) {
-//                                                    return !tempArray.includes( el );
-//                                                } );
-//
-//                                            }
-//                                        }
-//                                        console.log('objColorValues', objColorValues);
-//                                        console.log('cloneObjColor', cloneObjColor);
+
                                         while (objColorValues[objKey].length > 0) {
                                             arraySortedColor.push([]);
                                             objColorValues[objKey][0].objKey = objKey;
@@ -3751,22 +3705,7 @@
                                         }
                                         console.log('cloneSortedColor', cloneSortedColor);
 
-//                                        while (cloneObjColor[objKey].length > 0) {
-//                                            cloneSortedColor.push([]);
-//                                            cloneObjColor[objKey][0].objKey = objKey;
-//                                            cloneSortedColor[cloneSortedColor.length - 1].push(cloneObjColor[objKey][0]);
-//                                            var matchColor = cloneObjColor[objKey][0];
-//                                            cloneObjColor[objKey].shift();
-//                                            var index = 0;
-//                                            for (var m = 0; m < (cloneObjColor[objKey].length + index); m++) {
-//                                                if (app.checkAllowRange(matchColor, cloneObjColor[objKey][m - index])) {
-//                                                    cloneObjColor[objKey][m - index].objKey = objKey;
-//                                                    cloneSortedColor[cloneSortedColor.length - 1].push(cloneObjColor[objKey][m - index]);
-//                                                    cloneObjColor[objKey].splice(m - index, 1);
-//                                                    index++;
-//                                                }
-//                                            }
-//                                        }
+
                                     }
                                     var tempIndex = 0;
                                     console.log('arraySortedColor', arraySortedColor);
@@ -3791,24 +3730,7 @@
                                         var objByPercentage = {};
 
                                         for (var l = 0; l < tempArraySorted.length; l++) {
-//                                            var sortedArrayToRemove = [];
-//                                            for (var m = 0; m < tempArraySorted[l].length; m++) {
-//                                                if (tempArraySorted[l][m].value.split('-').length > 1) {
-//                                                    if (tempArraySorted[l].filter(function(each) {
-//                                                            return (tempArraySorted[l][m].brightness != null && tempArraySorted[l][m].brightness != '' && tempArraySorted[l][m].brightness == each.brightness)
-//                                                                || (tempArraySorted[l][m].saturation != null && tempArraySorted[l][m].saturation != '' && tempArraySorted[l][m].saturation == each.saturation)
-//                                                                || (tempArraySorted[l][m].multi_colored != null && tempArraySorted[l][m].multi_colored != '' && tempArraySorted[l][m].multi_colored == each.multi_colored);
-//                                                        }).length < 2) {
-//                                                        sortedArrayToRemove.push(tempArraySorted[l][m]);
-//                                                    }
-//                                                }
-//                                            }
-//                                            tempArraySorted[l] = tempArraySorted[l].filter(function(each) {
-//                                                return !sortedArrayToRemove.includes(each);
-//                                            });
-//                                            if (l > 0 || tempIndex > 0) {
-//                                                app.descriptionText += ', ';
-//                                            }
+
                                             var tempProperty = app.getPercentageForDescription(colorValues.length, tempArraySorted[l].eachCount);
                                             console.log('tempProperty', tempProperty);
 
@@ -3825,18 +3747,7 @@
                                                 }
 
 
-//                                                app.descriptionText += app.getPercentageForDescription(colorValues.length, tempArraySorted[l].eachCount) + ' ' + tempArraySorted[l][0].value + ' to ' + tempArraySorted[l][1].value;
-//                                                if (tempArraySorted[l].length > 2) {
-//                                                    for (var m = 2; m < tempArraySorted[l].length; m++) {
-//                                                        app.descriptionText += ' or to ' + tempArraySorted[l][m].value;
-//                                                    }
-//                                                }
-                                            } else {
-                                                if (!objByPercentage[tempProperty]) {
-                                                    objByPercentage[tempProperty] = [];
-                                                }
-                                                objByPercentage[tempProperty].push(tempArraySorted[l][0].value);
-//                                                app.descriptionText += app.getPercentageForDescription(colorValues.length, tempArraySorted[l].eachCount) + ' ' + tempArraySorted[l][0].value;
+
                                             }
 
                                         }
@@ -3990,9 +3901,7 @@
 
                                         for (var l = 0; l < tempArraySorted.length; l++) {
 
-//                                            if (l > 0 || tempIndex > 0) {
-//                                                app.descriptionText += ', ';
-//                                            }
+
                                             var tempProperty = app.getPercentageForDescription(nonColorValues.length, tempArraySorted[l].eachCount);
                                             if (!objByPercentage[tempProperty]) {
                                                 objByPercentage[tempProperty] = [];
@@ -4007,15 +3916,9 @@
                                                     }
                                                 }
 
-//                                                app.descriptionText += app.getPercentageForDescription(nonColorValues.length, tempArraySorted[l].eachCount) + ' ' + tempArraySorted[l][0].value + ' to ' + tempArraySorted[l][1].value;
-//                                                if (tempArraySorted[l].length > 2) {
-//                                                    for (var m = 2; m < tempArraySorted[l].length; m++) {
-//                                                        app.descriptionText += ' to or ' + tempArraySorted[l][m].value;
-//                                                    }
-//                                                }
+
                                             } else {
                                                 objByPercentage[tempProperty].push(tempArraySorted[l][0].value);
-//                                                app.descriptionText += app.getPercentageForDescription(nonColorValues.length, tempArraySorted[l].eachCount) + ' ' + tempArraySorted[l][0].value;
                                             }
                                         }
 
@@ -4233,6 +4136,8 @@
                 app.saveColorButtonFlag = true;
                 console.log('currentColorValue', app.currentColorValue);
                 console.log('app.currentColorValue', app.currentColorValue);
+                
+                app.originColorValue = app.currentColorValue;
 
                 if (app.currentColorValue['brightness'] && app.currentColorValue.confirmedFlag['brightness'] == false && !app.colorSynonyms['brightness'] && !app.searchTreeData(app.colTreeData['brightness'], app.currentColorValue['brightness'])) {
                     comparedFlag = false;
@@ -4298,6 +4203,18 @@
                             const flag=app.colorFlags[i];
                             if ( !app.colTreeData[flag] || !app.searchTreeData(app.colTreeData[flag],app.currentColorValue[flag]) ){
                                 if (app.currentColorValue[flag] == app.defaultColorValue[flag] && app.currentColorValue[flag] != '' && app.currentColorValue[flag] != undefined && app.currentColorValue[flag] != null){
+                                    if (app.colorSynonyms[flag]){
+                                        if (!app.userColorDefinition[flag] || app.userColorDefinition[flag]==''){
+                                            alert('pease enter definition of '+flag);
+                                            app.saveColorButtonFlag = false;
+                                            return;
+                                        }
+                                        if ( app.colorSampleText[flag] =='' || !app.colorSampleText[flag] ){
+                                            alert('pease enter sample sentence of '+flag);
+                                            app.saveColorButtonFlag = false;
+                                            return;
+                                        }
+                                    }
                                     var date = new Date();
                                     console.log('flag',flag);
                                     requestBody = {
@@ -4310,7 +4227,7 @@
                                         "createdBy": app.user.name,
                                         "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
                                         "definitionSrc": app.user.name,
-                                        "examples": app.colorSampleText['main_value'] + ", used in taxon " + app.colorTaxon['main_value'],
+                                        "examples": app.colorSampleText[flag] + ", used in taxon " + app.colorTaxon[flag],
                                         "logicDefinition": "",
                                     };
                                     console.log(requestBody);
@@ -4488,6 +4405,18 @@
     //                                    postFlag = false;
     //                                } else if (postFlag == true) {
     //                                    postValue['main_value'] = app.currentNonColorValue['main_value'].substr(0, app.currentNonColorValue['main_value'].length - 14);
+                                if ( !app.nonColorExistFlag ){
+                                    if ( app.userNonColorDefinition['main_value']=='' || app.userNonColorDefinition['main_value'] == null || app.userNonColorDefinition['main_value'] == undefined){
+                                        alert('please enter definition');
+                                        app.saveNonColorButtonFlag = false;
+                                        return;
+                                    }
+                                    if ( app.nonColorSampleText['main_value']=='' || app.nonColorSampleText['main_value'] == null || app.nonColorSampleText['main_value'] == undefined){
+                                        alert('please enter sample sentence');
+                                        app.saveNonColorButtonFlag = false;
+                                        return;
+                                    }
+                                }
                                 
                                 axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + app.currentNonColorValue['main_value'])
                                     .then(function (resp) {
@@ -4795,6 +4724,12 @@
                 app.nonColorDetails = [];
                 app.extraColors = [];
                 app.currentNonColorValue.detailsFlag = null;
+                // app.currentNonColorValue.main_value = '';
+                // app.currentNonColorValue.negation = '';
+                // app.currentNonColorValue.pre_constraint = '';
+                // app.currentNonColorValue.post_constraint = '';
+                // app.currentNonColorValue.degree_constraint = '';
+                // app.currentNonColorValue.certainty_constraint = '';
                 app.currentNonColorValue.value_id = value.id;
                 app.existColorDetailsFlag = true;
                 app.existNonColorDetailsFlag = true;
@@ -5220,6 +5155,7 @@
             },
             searchTreeData(tData, txt) {
                 var app = this;
+                if (!tData)return true;
                 if (tData.text == txt){
                     return true;
                 }

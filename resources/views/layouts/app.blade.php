@@ -141,7 +141,7 @@
                     <a id="top-user" href="{{ url('/leader-board') }}" style="text-decoration: none">
                         <div style="height: 34px;">
                             <img src="{{ asset('images/crown.png') }}" style="display: inline"/>
-                            <div style="color: #FFBC00; font-family: Arial; display: inline; vertical-align: bottom">{{ getTopUser() }}</div>
+                            <div style="color: gold; font-family: Arial; display: inline; vertical-align: bottom">{{ getTopUser() }}</div>
                         </div>
                     </a>
                 </div>
