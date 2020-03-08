@@ -1561,6 +1561,8 @@
 
     import draggable from 'vuedraggable'
 
+    import {runTest, Character, ColorQuality} from '../../LeafColors';
+
     Vue.use(LiquorTree);
     Vue.use({ModelSelect});
 
@@ -3467,9 +3469,14 @@
                             
                             var currentCharacter = app.userCharacters.find(ch => ch.id == filteredValues[0].character_id);
                             var char_name = currentCharacter.name.split(' of ')[1].toLowerCase().split(' in ')[0];
-                            if (char_name != currentCharacter.standard_tag.toLowerCase() && !char_names.find(ch => ch.includes(char_name))) {
-                                char_names.push(char_name);
-                                app.descriptionText += currentCharacter.name.split(' of ')[1].charAt(0).toUpperCase() + currentCharacter.name.split(' of ')[1].slice(1) + ' ';
+                            const temp = char_name;
+                            char_name = char_name.charAt(0).toUpperCase() + char_name.slice(1);
+                            if (char_name.toLowerCase() != currentCharacter.standard_tag.toLowerCase() && !char_names.find(ch => ch.includes(char_name.toLowerCase()))) {
+                                char_names.filter(ch => char_name.toLowerCase().includes(ch)).map(ch => {
+                                    char_name = char_name.split(' ').filter(sp => !ch.includes(sp.toLowerCase())).join(' ');
+                                });
+                                char_names.push(temp);
+                                app.descriptionText += char_name + ' ';
                             }
                             
                             if (app.checkHaveUnit(filteredCharacters[j].name)) {
@@ -3592,25 +3599,25 @@
                                                 multi_colored: colorValues[l].multi_colored
                                             };
                                             if (colorValues[l].negation != null && colorValues[l].negation != '') {
-                                                jsonColorValue.value = colorValues[l].negation + '-';
+                                                jsonColorValue.value = colorValues[l].negation + ' ';
                                             }
                                             if (colorValues[l].pre_constraint != null && colorValues[l].pre_constraint != '') {
-                                                jsonColorValue.value += colorValues[l].pre_constraint + '-';
+                                                jsonColorValue.value += colorValues[l].pre_constraint + ' ';
                                             }
                                             if (colorValues[l].brightness != null && colorValues[l].brightness != '') {
-                                                jsonColorValue.value += colorValues[l].brightness + '-';
+                                                jsonColorValue.value += colorValues[l].brightness + ' ';
                                             }
                                             if (colorValues[l].reflectance != null && colorValues[l].reflectance != '') {
-                                                jsonColorValue.value += colorValues[l].reflectance + '-';
+                                                jsonColorValue.value += colorValues[l].reflectance + ' ';
                                             }
                                             if (colorValues[l].saturation != null && colorValues[l].saturation != '') {
-                                                jsonColorValue.value += colorValues[l].saturation + '-';
+                                                jsonColorValue.value += colorValues[l].saturation + ' ';
                                             }
                                             if (colorValues[l].colored != null && colorValues[l].colored != '') {
                                                 jsonColorValue.value += colorValues[l].colored;
                                             }
                                             if (colorValues[l].multi_colored != null && colorValues[l].multi_colored != '') {
-                                                jsonColorValue.value += '-' + colorValues[l].multi_colored;
+                                                jsonColorValue.value += ' ' + colorValues[l].multi_colored;
                                             }
 
                                             objColorValues[colorValues[l].post_constraint].push(jsonColorValue);
@@ -3624,25 +3631,25 @@
                                                 multi_colored: colorValues[l].multi_colored
                                             };
                                             if (colorValues[l].negation != null && colorValues[l].negation != '') {
-                                                jsonColorValue.value = colorValues[l].negation + '-';
+                                                jsonColorValue.value = colorValues[l].negation + ' ';
                                             }
                                             if (colorValues[l].pre_constraint != null && colorValues[l].pre_constraint != '') {
-                                                jsonColorValue.value += colorValues[l].pre_constraint + '-';
+                                                jsonColorValue.value += colorValues[l].pre_constraint + ' ';
                                             }
                                             if (colorValues[l].brightness != null && colorValues[l].brightness != '') {
-                                                jsonColorValue.value += colorValues[l].brightness + '-';
+                                                jsonColorValue.value += colorValues[l].brightness + ' ';
                                             }
                                             if (colorValues[l].reflectance != null && colorValues[l].reflectance != '') {
-                                                jsonColorValue.value += colorValues[l].reflectance + '-';
+                                                jsonColorValue.value += colorValues[l].reflectance + ' ';
                                             }
                                             if (colorValues[l].saturation != null && colorValues[l].saturation != '') {
-                                                jsonColorValue.value += colorValues[l].saturation + '-';
+                                                jsonColorValue.value += colorValues[l].saturation + ' ';
                                             }
                                             if (colorValues[l].colored != null && colorValues[l].colored != '') {
                                                 jsonColorValue.value += colorValues[l].colored;
                                             }
                                             if (colorValues[l].multi_colored != null && colorValues[l].multi_colored != '') {
-                                                jsonColorValue.value += '-' + colorValues[l].multi_colored;
+                                                jsonColorValue.value += ' ' + colorValues[l].multi_colored;
                                             }
 
                                             objColorValues['empty'].push(jsonColorValue);
@@ -3800,10 +3807,13 @@
                                                 value: '',
                                             };
                                             if (nonColorValues[l].negation != null && nonColorValues[l].negation != '') {
-                                                jsonNonColorValue.value = nonColorValues[l].negation + '-';
+                                                jsonNonColorValue.value = nonColorValues[l].negation + ' ';
                                             }
                                             if (nonColorValues[l].pre_constraint != null && nonColorValues[l].pre_constraint != '') {
-                                                jsonNonColorValue.value += nonColorValues[l].pre_constraint + '-';
+                                                jsonNonColorValue.value += nonColorValues[l].pre_constraint + ' ';
+                                            }
+                                            if (nonColorValues[l].degree_constraint != null && nonColorValues[l].degree_constraint != '') {
+                                                jsonNonColorValue.value += nonColorValues[l].degree_constraint + ' ';
                                             }
 
                                             if (nonColorValues[l].main_value != null && nonColorValues[l].main_value != '') {
@@ -3818,10 +3828,13 @@
                                                 value: '',
                                             };
                                             if (nonColorValues[l].negation != null && nonColorValues[l].negation != '') {
-                                                jsonNonColorValue.value = nonColorValues[l].negation + '-';
+                                                jsonNonColorValue.value = nonColorValues[l].negation + ' ';
                                             }
                                             if (nonColorValues[l].pre_constraint != null && nonColorValues[l].pre_constraint != '') {
-                                                jsonNonColorValue.value += nonColorValues[l].pre_constraint + '-';
+                                                jsonNonColorValue.value += nonColorValues[l].pre_constraint + ' ';
+                                            }
+                                            if (nonColorValues[l].degree_constraint != null && nonColorValues[l].degree_constraint != '') {
+                                                jsonNonColorValue.value += nonColorValues[l].degree_constraint + ' ';
                                             }
 
                                             if (nonColorValues[l].main_value != null && nonColorValues[l].main_value != '') {
@@ -3837,6 +3850,7 @@
                                                 return each.value.endsWith(objNonColorValues[objKey][l].value);
                                             }).length;
                                         }
+                                        console.log('objNonColorValues ',objNonColorValues[objKey]);
                                         for (var l = 0; l < objNonColorValues[objKey].length; l++) {
                                             if (objNonColorValues[objKey][l].count > 1) {
                                                 var tempArray = objNonColorValues[objKey].filter(function (each) {
@@ -4011,8 +4025,11 @@
                         return 'sometimes';
                     } else if (percentage > 50 && percentage <= 75) {
                         return 'usually';
-                    } else if (percentage > 75 && percentage <= 100) {
+                    } else if (percentage > 75 && percentage < 100) {
                         return 'frequently';
+                    }
+                    else {
+                        return '';
                     }
                 }
             },
