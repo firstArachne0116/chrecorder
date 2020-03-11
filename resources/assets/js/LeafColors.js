@@ -93,7 +93,10 @@ class Quality {
 	// helper method to get frequency modifer based on main
 	static getFrequencyModifier(qualities, numCharacters) {
 		let percentage = qualities.length / numCharacters
-		if (percentage >= .75){
+		if (qualities.length == numCharacters){
+			return "";
+		}
+		else if (percentage >= .75){
 			return "frequently "
 		} else if (percentage >= .5){
 			return "usually "
@@ -198,7 +201,7 @@ export class ColorQuality extends Quality {
 	// overriden
 	isNextInRange(otherQuality) {
 		// returns true if color1 points to color2
-		if (Colorsets[this.color].has(otherQuality.color)) {
+		if (Colorsets[this.color] && Colorsets[this.color].has(otherQuality.color)) {
 			return true
 		}
 		return false
@@ -222,7 +225,7 @@ export class Character {
 	}
 }
 
-class Node {
+export class Node {
 	constructor(character) {
 		this.name = character.quality.mainQuality //+ "+" + character.pattern
 		// array contains characters that match in both color and pattern
@@ -311,7 +314,7 @@ export function runTest(characters) {
 					}
 				})
 				if (createNew) {
-					newgraph = createQualityGraph(character, clause, [character])
+					var newgraph = createQualityGraph(character, clause, [character])
 					graphs.push(newgraph)
 				}
 			}
@@ -361,11 +364,12 @@ export function runTest(characters) {
 			fullDescription += ", and "
 		}
 	})
-	console.log(fullDescription)
+	//console.log(fullDescription)
+	return fullDescription
 }
 
 // nodes: a single directed, acyclic, topologically sorted graph
-function getRanges(nodes) {
+export function getRanges(nodes) {
 	let invalidNodes = []
 	var arrayLength = nodes.length
 
@@ -419,7 +423,7 @@ function getRanges(nodes) {
 }
 
 // creates one graph of quality nodes
-function createQualityGraph(character, clause, newGraph) {
+export function createQualityGraph(character, clause, newGraph) {
 	// iterate through quality matches
 	clause.forEach(function (clauseChar) {
 		if(!clauseChar.includedInGraph) {
@@ -433,7 +437,7 @@ function createQualityGraph(character, clause, newGraph) {
 	return newGraph
 }
 
-function topologicalSortUtil(node, stack) {
+export function topologicalSortUtil(node, stack) {
 	node.visited = true
 	if (node.after != null ){
 		node.after.forEach(function (nextNode) {
@@ -445,7 +449,7 @@ function topologicalSortUtil(node, stack) {
 	stack.push(node)
 }
 
-function topologicalSort(nodes) {
+export function topologicalSort(nodes) {
 	let stack = []
 	nodes.forEach(function (node) {
 		if (node.visited == false) {
@@ -458,7 +462,7 @@ function topologicalSort(nodes) {
 
 // ranges: 2D array of nodes
 // numCharacters: total number of characters, used to determine frequency modifier in description
-function getDescriptionForRanges(ranges, numCharactersTotal) {
+export function getDescriptionForRanges(ranges, numCharactersTotal) {
 	var rangeDescription = ""
 	ranges.forEach(function (range, index) {
 		var aRangeDescription = ""
@@ -557,5 +561,5 @@ let samePattern = [greenCharacter1, greenCharacter3] // one color, same patterns
 let testRanges = [yellowCharacter, greenCharacter1, purpleCharacter] // 2 separate ranges in same clause
 let testCase = [greenCharacter3, brownCharacter, whiteCharacter, greenCharacter2, greenCharacter4]
 
-runTest(testCase)
+runTest(testRanges)
 // runTest(testRanges)

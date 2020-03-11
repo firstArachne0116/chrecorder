@@ -93,7 +93,10 @@ class Quality {
 	// helper method to get frequency modifer based on main
 	static getFrequencyModifier(qualities, numCharacters) {
 		let percentage = qualities.length / numCharacters
-		if (percentage >= .75){
+		if (qualities.length == numCharacters){
+			return "";
+		}
+		else if (percentage >= .75){
 			return "frequently "
 		} else if (percentage >= .5){
 			return "usually "
@@ -198,7 +201,7 @@ class ColorQuality extends Quality {
 	// overriden
 	isNextInRange(otherQuality) {
 		// returns true if color1 points to color2
-		if (Colorsets[this.color].has(otherQuality.color)) {
+		if (Colorsets[this.color] && Colorsets[this.color].has(otherQuality.color)) {
 			return true
 		}
 		return false
@@ -311,7 +314,7 @@ function runTest(characters) {
 					}
 				})
 				if (createNew) {
-					newgraph = createQualityGraph(character, clause, [character])
+					var newgraph = createQualityGraph(character, clause, [character])
 					graphs.push(newgraph)
 				}
 			}
@@ -361,7 +364,8 @@ function runTest(characters) {
 			fullDescription += ", and "
 		}
 	})
-	console.log(fullDescription)
+	//console.log(fullDescription)
+	return fullDescription
 }
 
 // nodes: a single directed, acyclic, topologically sorted graph
@@ -557,5 +561,5 @@ let samePattern = [greenCharacter1, greenCharacter3] // one color, same patterns
 let testRanges = [yellowCharacter, greenCharacter1, purpleCharacter] // 2 separate ranges in same clause
 let testCase = [greenCharacter3, brownCharacter, whiteCharacter, greenCharacter2, greenCharacter4]
 
-runTest(testCase)
+console.log(runTest(testRanges))
 // runTest(testRanges)

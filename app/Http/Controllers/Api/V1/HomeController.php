@@ -49,7 +49,7 @@ class HomeController extends Controller
     public function getHeaders() {
         return Header::where('user_id', Auth::id())
             ->orWhere('user_id', NULL)
-            ->orderBy('created_at', 'desc')->get();
+            ->orderBy('header', 'desc')->get();
     }
 
     public function getAllColorValues() {
@@ -520,6 +520,7 @@ class HomeController extends Controller
                     'user_id' => $request->input('user_id'),
                     'header' => 'Sample' . ($sampleNum),
                 ]);
+                $sampleNum = $sampleNum + 1;
             }
         }
 
@@ -1258,23 +1259,18 @@ class HomeController extends Controller
     }
 
     public function changeOrder(Request $request) {
-        $characterId = $request->input('characterId');
-        $order = $request->input('order');
-        if ($order == 'up') {
-            $character = Character::where('id', '=', $characterId)->first();
-            $beforeCharacter = Character::where('order', '=', ($character->order - 1))->first();
-            $character->order = $character->order - 1;
-            $character->save();
-            $beforeCharacter->order = $beforeCharacter->order + 1;
-            $beforeCharacter->save();
-        } else if ($order == 'down') {
-            $character = Character::where('id', '=', $characterId)->first();
-            $afterCharacter = Character::where('order', '=', ($character->order + 1))->first();
-            $character->order = $character->order + 1;
-            $character->save();
-            $afterCharacter->order = $afterCharacter->order - 1;
-            $afterCharacter->save();
-        }
+        $firstId = $request->input('firstId');
+        $secondId = $request->input('secondId');
+
+        $firstCharacter = Character::where('id', '=', $firstId)->first();
+        $secondCharacter = Character::where('id', '=', $secondId)->first();
+
+        $tmp = $firstCharacter->order;
+        $firstCharacter->order = $secondCharacter->order;
+        $secondCharacter->order = $tmp;
+
+        $firstCharacter->save();
+        $secondCharacter->save();
 
         $returnValues = $this->getValuesByCharacter();
         $returnCharacters = $this->getArrayCharacters();
@@ -1294,9 +1290,11 @@ class HomeController extends Controller
         $header->header = $request->input('header');
         $header->save();
         $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
 
         $data = [
             'headers' => $returnHeaders,
+            'values' => $returnValues,
         ];
 
         return $data;
@@ -1518,17 +1516,19 @@ class HomeController extends Controller
 
             $nonColorDetails->save();
         } else {
-            $nonColorDetails = new NonColorDetails([
-                'value_id' => $request->input('value_id'),
-                'negation' =>  $request->input('negation') ?  $request->input('negation') : null,
-                'pre_constraint' =>  $request->input('pre_constraint') ?  $request->input('pre_constraint') : null,
-                'certainty_constraint' =>  $request->input('certainty_constraint') ?  $request->input('certainty_constraint') : null,
-                'degree_constraint' =>  $request->input('degree_constraint') ?  $request->input('degree_constraint') : null,
-                'main_value' =>  $request->input('main_value') ?  $request->input('main_value') : null,
-                'post_constraint' =>  $request->input('post_constraint') ?  $request->input('post_constraint') : null,
-            ]);
+            if (Value::where('id', '=', $request->input('value_id'))->first()->header_id != 1){
+                $nonColorDetails = new NonColorDetails([
+                    'value_id' => $request->input('value_id'),
+                    'negation' =>  $request->input('negation') ?  $request->input('negation') : null,
+                    'pre_constraint' =>  $request->input('pre_constraint') ?  $request->input('pre_constraint') : null,
+                    'certainty_constraint' =>  $request->input('certainty_constraint') ?  $request->input('certainty_constraint') : null,
+                    'degree_constraint' =>  $request->input('degree_constraint') ?  $request->input('degree_constraint') : null,
+                    'main_value' =>  $request->input('main_value') ?  $request->input('main_value') : null,
+                    'post_constraint' =>  $request->input('post_constraint') ?  $request->input('post_constraint') : null,
+                ]);
 
-            $nonColorDetails->save();
+                $nonColorDetails->save();
+            }
         }
 
         $characterName = Character::where('id', '=', Value::where('id', '=', $request->input('value_id'))->first()->character_id)->first()->name;
@@ -1736,6 +1736,8 @@ class HomeController extends Controller
                                 'value_id' => $eachValue->id,
                                 'negation' => $eachColorDetails->negation,
                                 'pre_constraint' => $eachColorDetails->pre_constraint,
+                                'certainty_constraint' => $eachColorDetails->certainty_constraint,
+                                'degree_constraint' => $eachColorDetails->degree_constraint,
                                 'brightness' => $eachColorDetails->brightness,
                                 'reflectance' => $eachColorDetails->reflectance,
                                 'saturation' => $eachColorDetails->saturation,
@@ -1760,6 +1762,8 @@ class HomeController extends Controller
                                 'value_id' => $eachValue->id,
                                 'negation' => $eachNonColorDetails->negation,
                                 'pre_constraint' => $eachNonColorDetails->pre_constraint,
+                                'certainty_constraint' => $eachNonColorDetails->certainty_constraint,
+                                'degree_constraint' => $eachNonColorDetails->degree_constraint,
                                 'main_value' => $eachNonColorDetails->main_value,
                                 'post_constraint' => $eachNonColorDetails->post_constraint,
                             ]);
@@ -1809,7 +1813,7 @@ class HomeController extends Controller
             $colorDetails = ColorDetails::where('value_id', '=', $selectedValue->id)->get();
             if ($colorDetails) {
                 foreach ($values as $eachValue) {
-                    if ($eachValue->id != $value['id']) {
+                    if ($eachValue->id != $value['id'] && $eachValue->header_id != 1) {
                         $existColorDetails = ColorDetails::where('value_id', '=', $eachValue->id)->first();
                         if (!$existColorDetails) {
                             foreach ($colorDetails as $eachColorDetails) {
@@ -1836,7 +1840,7 @@ class HomeController extends Controller
             $nonColorDetails = NonColorDetails::where('value_id', '=', $selectedValue->id)->get();
             if ($nonColorDetails) {
                 foreach ($values as $eachValue) {
-                    if ($eachValue->id != $value['id']) {
+                    if ($eachValue->id != $value['id'] && $eachValue->header_id != 1) {
                         $existNonColorDetails = NonColorDetails::where('value_id', '=', $eachValue->id)->first();
                         if (!$existNonColorDetails) {
                             foreach ($nonColorDetails as $eachNonColorDetails) {
