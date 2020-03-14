@@ -357,7 +357,6 @@
                                                             <option value="Color">Color</option>
                                                             <option value="Shape">Shape</option>
                                                             <option value="Texture">Texture</option>
-                                                            <option value="Distance"></option>
                                                         </datalist>
                                                         <!--<select v-model="firstCharacter" style="height: 26px;">-->
                                                         <!--<option>Length</option>-->
@@ -375,6 +374,9 @@
                                                     </div>
                                                     <div class="col-md-5">
                                                         <input v-model="lastCharacter" v-on:focus="nounUndefined = false; lastCharacterDefinition = ''" placeholder="enter a singular noun">
+                                                        <br v-if="middleCharacter=='between'"/>
+                                                        <div v-if="middleCharacter=='between'" style="width:100%; text-align: center">and</div>
+                                                        <input v-if="middleCharacter=='between'" v-model="secondLastCharacter" v-on:focus="secondNounUndefined = false; lastCharacterDefinition = ''" placeholder="enter a singular noun">
                                                     </div>
 
                                                     <!--<input autofocus v-model="character.name" v-on:input="checkMsg"/>-->
@@ -385,10 +387,15 @@
                                                         What is {{lastCharacter}}? : <input v-model="lastCharacterDefinition" style="width:100%" :placeholder="'enter the definition of ' + lastCharacter">
                                                     </div>
                                                 </div>
+                                                <div class ="row" v-if="secondNounUndefined && middleCharacter == 'between'">
+                                                    <div class = "col-md-12">
+                                                        What is {{secondLastCharacter}}? : <input v-model="secondLastCharacterDefinition" style="width:100%" :placeholder="'enter the definition of ' + secondLastCharacter">
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div class="modal-footer">
                                                 <a class="btn btn-primary ok-btn"
-                                                   v-bind:class="{ disabled: !firstCharacter || !middleCharacter || !lastCharacter || nounUndefined && !lastCharacterDefinition}"
+                                                   v-bind:class="{ disabled: !firstCharacter || !middleCharacter || !lastCharacter || nounUndefined && !lastCharacterDefinition || middleCharacter=='between' && (!secondLastCharacter || secondNounUndefined && !secondLastCharacterDefinition)}"
                                                    v-on:click="checkStoreCharacter()">
                                                     &nbsp; &nbsp; Next: Define Character &nbsp; &nbsp; </a>
                                                 <a v-on:click="cancelNewCharacter()" class="btn btn-danger">Cancel</a>
@@ -469,6 +476,7 @@
                                                     <div class="col-md-12 text-right" style="margin-top: 15px;">
                                                         <a v-if="viewFlag == false"
                                                            v-on:click="saveCharacter(metadataFlag)"
+                                                           v-bind:class="{disabled: saveCharacterButtonFlag}"
                                                            class="btn btn-primary">Save</a>
                                                         <a v-if="viewFlag == true" v-on:click="use(item)"
                                                            class="btn btn-primary">Use this</a>
@@ -493,11 +501,11 @@
                         </div>
                         <div v-if="confirmMethod" @close="confirmMethod = false">
                             <transition name="modal">
-                                <div class="modal-mask character-modal">
+                                <div class="modal-mask">
                                     <div class="modal-wrapper">
                                         <div class="modal-container">
                                             <div class="modal-header">
-                                                Confirm Method
+                                                <b>Review Your Decision</b>
                                             </div>
                                             <div class="modal-body">
                                                 <div v-if="!character.method_as">
@@ -554,11 +562,11 @@
                         </div>
                         <div v-if="confirmUnit" @close="confirmUnit = false">
                             <transition name="modal">
-                                <div class="modal-mask character-modal">
+                                <div class="modal-mask">
                                     <div class="modal-wrapper">
                                         <div class="modal-container">
                                             <div class="modal-header">
-                                                Confirm Unit
+                                                <b>Review Your Decision</b>
                                             </div>
                                             <div class="modal-body">
                                                 <div>
@@ -581,11 +589,11 @@
                     </div>
                     <div v-if="confirmTag" @close="confirmTag = false">
                         <transition name="modal">
-                            <div class="modal-mask character-modal">
+                            <div class="modal-mask">
                                 <div class="modal-wrapper">
                                     <div class="modal-container">
                                         <div class="modal-header">
-                                            Confirm Tag
+                                            <b>Review Your Decision</b>
                                         </div>
                                         <div class="modal-body">
                                             <div>
@@ -607,11 +615,11 @@
                 </div>
                 <div v-if="confirmSummary" @close="confirmSummary = false">
                     <transition name="modal">
-                        <div class="modal-mask character-modal">
+                        <div class="modal-mask">
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Confirm Summary Function
+                                        <b>Review Your Decision</b>
                                     </div>
                                     <div class="modal-body">
                                         <div v-if="character.summary">
@@ -635,23 +643,23 @@
                 </div>
                 <div v-if="removeAllStandardFlag" @close="removeAllStandardFlag = false">
                     <transition name="modal">
-                        <div class="modal-mask character-modal">
+                        <div class="modal-mask">
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Confirm to Remove Recommended Characters
+                                        <b>Confirmation</b>
                                     </div>
                                     <div class="modal-body">
                                         <div>
-                                            Do you want to remove all recommended characters from your matrix?
+                                            <b>Do you want to remove all recommended characters from your matrix?</b>
                                         </div>
-                                        <div class="modal-footer">
-                                            <a class="btn btn-primary ok-btn"
-                                               v-on:click="removeAllStandardCharacters()">
-                                                &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
-                                            <a v-on:click="removeAllStandardFlag = false;"
-                                               class="btn btn-danger">Cancel</a>
-                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a class="btn btn-primary ok-btn"
+                                            v-on:click="removeAllStandardCharacters()">
+                                            &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
+                                        <a v-on:click="removeAllStandardFlag = false;"
+                                            class="btn btn-danger">Cancel</a>
                                     </div>
                                 </div>
                             </div>
@@ -665,7 +673,8 @@
                                 <div class="modal-container">
                                     <div style="max-height:80vh; overflow-y:scroll;">
                                         <div class="modal-header">
-                                            <b>{{ currentCharacter.name }}</b> <br/>
+                                            <b>Add a Value for <font style="color: #0070C0; font-style: italic">{{ currentCharacter.name }}:</font></b> {{ currentColorValue.value.slice(0, -2) }}
+                                            <br/>
                                             <hr>
                                             <div v-if="existColorDetails.length > 0"
                                                 style="border-radius: 5px; border: 1px solid; padding: 15px;">
@@ -682,103 +691,60 @@
 
                                                 <div style="margin-top: 10px; min-height: auto;" class="table-responsive">
                                                     <div>
-                                                        <b>Values used before for this character and taxon</b>
+                                                        <b style="text-decoration: underline">Reuse a Value</b>
                                                     </div>
-                                                    <table class="table table-bordered"
-                                                        v-if="existColorDetailsFlag == true">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>
-                                                                negation
-                                                            </th>
-                                                            <th>
-                                                                pre constraint
-                                                            </th>
-                                                            <th>
-                                                                certainty constraint
-                                                            </th>
-                                                            <th>
-                                                                degree constraint
-                                                            </th>
-                                                            <th>
-                                                                brightness
-                                                            </th>
-                                                            <th>
-                                                                reflectance
-                                                            </th>
-                                                            <th>
-                                                                saturation
-                                                            </th>
-                                                            <th>
-                                                                color
-                                                            </th>
-                                                            <th>
-                                                                pattern
-                                                            </th>
-                                                            <th>
-                                                                post constraint
-                                                            </th>
-                                                            <th>
-                                                                count
-                                                            </th>
-                                                            <th>
-                                                                author
-                                                            </th>
-                                                            <th>
-
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr v-for="eachDetails in existColorDetails">
-                                                            <td>
-                                                                {{ eachDetails.negation }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.pre_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.certainty_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.degree_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.brightness }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.reflectance }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.saturation }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.colored }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.multi_colored }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.post_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.count }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.username }}
-                                                            </td>
-                                                            <td>
+                                                    <div v-if="existColorDetailsFlag == true" style="margin-top: 10px;">
+                                                        <div v-for="(eachDetails,index) in existColorDetails" :key="eachDetails.id" style="border-bottom: gray; padding 2px; font-size: 11pt">
+                                                            <hr v-if="index" style="margin-top: 8px; margin-bottom: 8px; border-top-color: #ddd;">
+                                                            <span style="margin-left: 20px; margin-right: 50px">
                                                                 <a class="btn btn-primary"
-                                                                v-on:click="selectExistDetails(eachDetails)">Use this</a>
-                                                            </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
+                                                                v-on:click="selectExistDetails(eachDetails)" style="padding-top: 3px; padding-bottom: 3px;">Use this</a>
+                                                            </span>
+                                                            <b>
+                                                                <span>
+                                                                    {{ eachDetails.negation }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.pre_constraint }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.certainty_constraint }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.degree_constraint }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.brightness }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.reflectance }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.saturation }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.colored }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.multi_colored }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.post_constraint }}
+                                                                </span>
+                                                            </b>
+                                                            <span>
+                                                                , usages = {{ eachDetails.count }}
+                                                            </span>
+                                                            <span>
+                                                                , creator = {{ eachDetails.username }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
 
                                                 </div>
                                             </div>
 
-                                            <div v-if="colorDetails.length > 0"
+                                            <!-- <div v-if="colorDetails.length > 0"
                                                 style="border-radius: 5px; border: 1px solid; padding: 15px; margin-top: 10px;">
                                                 <div style="float: right;">
                                                     <a class="btn btn-primary" v-if="currentColorValueExist == false"
@@ -845,7 +811,7 @@
                                                         v-on:click="removeEachColor(eachColor)">Remove</a>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> -->
 
                                         </div>
 
@@ -853,9 +819,7 @@
 
                                             <div style="border-radius: 5px; border: 1px solid; padding: 15px;">
                                                 <div>
-                                                    <b>Formulate a value:</b> type in a blank to select existing phrases or
-                                                    use your own terms(need
-                                                    definition)
+                                                    <b style="text-decoration: underline">Create/Edit Value</b>
                                                 </div>
                                                 <div>
                                                     <div style="display: inline-block;">
@@ -1060,27 +1024,24 @@
                                                     </div>
                                                     
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="row">
-                                            <div class="col-md-6" style="text-align: left;">
-                                                <a class="btn btn-primary ok-btn"
-                                                   v-on:click="removeColorValue()">
-                                                    Remove All Values </a>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <a class="btn btn-primary ok-btn"
-                                                   :disabled="saveColorButtonFlag"
-                                                   v-on:click="saveColorValue()">
-                                                    Save </a>
-                                                <!-- <a class="btn btn-primary ok-btn"
-                                                   :disabled="saveColorButtonFlag"
-                                                   v-on:click="saveColorValue(true)">
-                                                    Save & New </a> -->
-                                                <a v-on:click="colorDetailsFlag = false;"
-                                                   class="btn btn-danger">Cancel</a>
+                                                
+                                                <div class="row">
+                                                    <div style="float: right; margin-right: 20px">
+                                                        <a class="btn btn-primary ok-btn"
+                                                        :disabled="saveColorButtonFlag"
+                                                        v-on:click="saveColorValue()">
+                                                            Save </a>
+                                                        &nbsp;&nbsp;
+                                                        <!-- <a class="btn btn-primary ok-btn"
+                                                        :disabled="saveColorButtonFlag"
+                                                        v-on:click="saveColorValue(true)">
+                                                            Save & New </a> -->
+                                                        <a v-on:click="colorDetailsFlag = false;"
+                                                        class="btn btn-danger">Cancel</a>
+                                                        &nbsp;&nbsp;
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -1096,7 +1057,8 @@
                                 <div class="modal-container">
                                     <div style="max-height:80vh; overflow-y:scroll;">
                                         <div class="modal-header">
-                                            <b>{{ currentCharacter.name }}</b> <br/>
+                                            <b>Add a Value for <font style="color: #0070C0; font-style: italic">{{ currentCharacter.name }}:</font></b> {{ currentNonColorValue.value.slice(0, -2) }}
+                                            <br/>
                                             <hr>
                                             <div v-if="existNonColorDetails.length > 0"
                                                 style="border-radius: 5px; border: 1px solid; padding: 15px;">
@@ -1113,78 +1075,47 @@
 
                                                 <div style="margin-top: 10px; min-height: auto;" class="table-responsive">
                                                     <div>
-                                                        <b>Values used before for this character and taxon</b>
+                                                        <b style="text-decoration: underline">Reuse a Value</b>
                                                     </div>
-                                                    <table class="table table-bordered"
-                                                        v-if="existNonColorDetailsFlag == true">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>
-                                                                negation
-                                                            </th>
-                                                            <th>
-                                                                pre constraint
-                                                            </th>
-                                                            <th>
-                                                                certainty constraint
-                                                            </th>
-                                                            <th>
-                                                                degree constraint
-                                                            </th>
-                                                            <th>
-                                                                {{ currentNonColorValue.placeholderName }}
-                                                            </th>
-                                                            <th>
-                                                                post constraint
-                                                            </th>
-                                                            <th>
-                                                                count
-                                                            </th>
-                                                            <th>
-                                                                author
-                                                            </th>
-                                                            <th>
-
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr v-for="eachDetails in existNonColorDetails">
-                                                            <td>
-                                                                {{ eachDetails.negation }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.pre_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.certainty_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.degree_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.main_value }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.post_constraint }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.count }}
-                                                            </td>
-                                                            <td>
-                                                                {{ eachDetails.username }}
-                                                            </td>
-                                                            <td>
-                                                                <a class="btn btn-primary"
+                                                    <div v-if="existNonColorDetailsFlag == true" style="margin-top: 10px;">
+                                                        <div v-for="(eachDetails, index) in existNonColorDetails" :key="eachDetails.id" style="border-bottom: gray; padding 2px; font-size: 11pt">
+                                                            <hr v-if="index" style="margin-top: 8px; margin-bottom: 8px; border-top-color: #ddd;">
+                                                            <span style="margin-left: 20px; margin-right: 50px">
+                                                                <a class="btn btn-primary" style="padding-top: 3px; padding-bottom: 3px;"
                                                                 v-on:click="selectExistNonColorDetails(eachDetails)">Use this</a>
-                                                            </td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
+                                                            </span>
+                                                            <b>
+                                                                <span>
+                                                                    {{ eachDetails.negation }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.pre_constraint }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.certainty_constraint }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.degree_constraint }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.main_value }}
+                                                                </span>
+                                                                <span>
+                                                                    {{ eachDetails.post_constraint }}
+                                                                </span>
+                                                            </b>
+                                                            <span>
+                                                                , usages = {{ eachDetails.count }}
+                                                            </span>
+                                                            <span>
+                                                                , creator = {{ eachDetails.username }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
 
                                                 </div>
                                             </div>
-                                            <div v-if="nonColorDetails.length > 0"
+                                            <!-- <div v-if="nonColorDetails.length > 0"
                                                 style="border-radius: 5px; border: 1px solid; padding: 15px; margin-top: 10px;">
                                                 <div style="float: right;">
                                                     <a class="btn btn-primary" v-if="currentNonColorValueExist == false"
@@ -1235,16 +1166,14 @@
                                                         v-on:click="removeEachNonColor(eachValue)">Remove</a>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> -->
 
                                         </div>
                                         <div class="modal-body">
 
                                             <div style="border-radius: 5px; border: 1px solid; padding: 15px;">
                                                 <div>
-                                                    <b>Formulate a value:</b> select existing phrases or use your own
-                                                    terms(need
-                                                    definition)
+                                                    <b style="text-decoration: underline">Create/Edit Value</b>
                                                 </div>
                                                 <div>
                                                     <div style="display: inline-block;">
@@ -1400,27 +1329,21 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="row">
-                                            <div class="col-md-6" style="text-align: left;">
-                                                <a class="btn btn-primary ok-btn"
-                                                   v-on:click="removeNonColorValue()">
-                                                    Remove All Values </a>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <a class="btn btn-primary ok-btn"
-                                                   :disabled="saveNonColorButtonFlag"
-                                                   v-on:click="saveNonColorValue()">
-                                                    Save </a>
-                                                <a class="btn btn-primary ok-btn"
-                                                   :disabled="saveNonColorButtonFlag"
-                                                   v-on:click="saveNonColorValue(true)">
-                                                    Save & New </a>
-                                                <a v-on:click="nonColorDetailsFlag = false;currentNonColorValue.main_value='';currentNonColorValue.negation = null;currentNonColorValue.pre_constraint = null;currentNonColorValue.certainty_constraint = null;currentNonColorValue.degree_constraint = null;currentNonColorValue.post_constraint = null;currentNonColorValue.confirmedFlag['main_value'] = false;"
-                                                   class="btn btn-danger">Cancel</a>
+                                                
+                                                <div class="row">
+                                                    <div style="float: right; margin-right: 20px">
+                                                        <a class="btn btn-primary ok-btn"
+                                                        :disabled="saveNonColorButtonFlag"
+                                                        v-on:click="saveNonColorValue()">
+                                                            Save </a>
+                                                        <!-- <a class="btn btn-primary ok-btn"
+                                                        :disabled="saveNonColorButtonFlag"
+                                                        v-on:click="saveNonColorValue(true)">
+                                                            Save & New </a> -->
+                                                        <a v-on:click="nonColorDetailsFlag = false;currentNonColorValue.main_value='';currentNonColorValue.negation = null;currentNonColorValue.pre_constraint = null;currentNonColorValue.certainty_constraint = null;currentNonColorValue.degree_constraint = null;currentNonColorValue.post_constraint = null;currentNonColorValue.confirmedFlag['main_value'] = false;"
+                                                        class="btn btn-danger">Cancel</a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -1435,12 +1358,12 @@
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Confirm to overwrite?
+                                        <b>Confirm to overwrite?</b>
                                     </div>
                                     <div class="modal-body">
                                         <div>
-                                            There are values in the cells to be filled. Overwrite or keep the old
-                                            values?
+                                            <b>There are values in the cells to be filled. Overwrite or keep the old
+                                            values?</b>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -1465,11 +1388,11 @@
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Confirm to remove?
+                                        <b>Confirm to remove?</b>
                                     </div>
                                     <div class="modal-body">
                                         <div>
-                                            Are you sure you want to remove {{ userCharacters.find(each => each.id == toRemoveCharacterId).name }}?
+                                            <b>Are you sure you want to remove {{ userCharacters.find(each => each.id == toRemoveCharacterId).name }}?</b>
                                         </div>
                                         <br/>
                                         <br/>
@@ -1503,11 +1426,11 @@
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Confirm to remove?
+                                        <b>Confirm to remove?</b>
                                     </div>
                                     <div class="modal-body">
                                         <div>
-                                            Are you sure you want to remove {{ headers.find(each => each.id == toRemoveHeaderId).header }}?
+                                            <b>Are you sure you want to remove {{ headers.find(each => each.id == toRemoveHeaderId).header }}?</b>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -1532,11 +1455,11 @@
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Confirmation
+                                        <b>Confirmation</b>
                                     </div>
                                     <div class="modal-body">
                                         <div>
-                                            Do you want a matrix with your selected characters be displayed?
+                                            <b>Do you want a matrix with your selected characters be displayed?</b>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -1594,6 +1517,19 @@
         RED : "red",
         PURPLE : "purple",
     }
+    
+    
+    var inactivityTimeout = null;
+    resetTimeout()
+    function onUserInactivity() {
+        window.location.href = "logout";
+    }
+    function resetTimeout() {
+        if (inactivityTimeout)
+            clearTimeout(inactivityTimeout);
+        inactivityTimeout = setTimeout(onUserInactivity, 1000 * 3600);
+    }
+    window.onmousemove = resetTimeout;
 
     let Colorsets = {
         white: new Set([Color.WHITE, Color.BLACK, Color.GREEN, Color.YELLOW, Color.BROWN, Color.GOLD, Color.RED, Color.PURPLE]),
@@ -1692,6 +1628,8 @@
                 middleCharacter: null,
                 lastCharacter: null,
                 lastCharacterDefinition: null,
+                secondLastCharacter: null,
+                secondLastCharacterDefinition: null,
                 newCharacterFlag: false,
                 detailsFlag: false,
                 metadataFlag: null,
@@ -1860,6 +1798,8 @@
                 saveNonColorButtonFlag: false,
                 filterFlag: true,
                 nounUndefined: false,
+                secondNounUndefined: false,
+                saveCharacterButtonFlag: false,
             }
         },
         components: {
@@ -1886,6 +1826,7 @@
                         app.character.method_include = event[6];
                         app.character.method_exclude = event[7];
                         app.character.method_where = event[8];
+                        app.character.method_greenTick = event[10];
                         app.parentData = event;
                         app.methodUpdateFlag = true;
                         console.log("method return", event);
@@ -1932,7 +1873,11 @@
                     app.firstCharacter = '';
                     app.middleCharacter = '';
                     app.lastCharacter = '';
+                    app.secondLastCharacter = '';
+                    app.lastCharacterDefinition = '';
+                    app.secondLastCharacterDefinition = '';
                     app.nounUndefined = false;
+                    app.secondNounUndefined = false;
 
                     app.newCharacterFlag = true;
                     app.viewFlag = false;
@@ -2140,9 +2085,74 @@
                                     console.log('save api resp', resp);
                                 });
                         });
+                    if (app.middleCharacter == 'between' && app.secondNounUndefined){
+                        var date = new Date();
+                        requestBody = {
+                            "user": app.sharedFlag ? '' : app.user.name,
+                            "ontology": "carex",
+                            "term": app.secondLastCharacter,
+                            "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#toreview",
+                            "definition": app.secondLastCharacterDefinition,
+                            "elucidation": "",
+                            "createdBy": app.user.name,
+                            "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                            "definitionSrc": app.user.name,
+                        };
+                        console.log(requestBody);
+                        axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
+                            .then(function (resp) {
+                                console.log('shark api class resp', resp);
+                                axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                    user: app.sharedFlag ? '' : app.user.name,
+                                    ontology: 'carex'
+                                })
+                                    .then(function (resp) {
+                                        console.log('save api resp', resp);
+                                    });
+                            });
+                    }
                     app.storeCharacter();
                     return;
                 }
+                else if (app.middleCharacter == 'between' && app.secondNounUndefined) {
+                    axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + app.lastCharacter.toLowerCase())
+                        .then(function(resp){
+                            console.log('term?'+app.lastCharacter, resp.data);
+                            if (!resp.data.entries.length){
+                                app.nounUndefined = true;
+                                return
+                            }
+                            else {
+                                var date = new Date();
+                                requestBody = {
+                                    "user": app.sharedFlag ? '' : app.user.name,
+                                    "ontology": "carex",
+                                    "term": app.secondLastCharacter,
+                                    "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#toreview",
+                                    "definition": app.secondLastCharacterDefinition,
+                                    "elucidation": "",
+                                    "createdBy": app.user.name,
+                                    "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                    "definitionSrc": app.user.name,
+                                };
+                                console.log(requestBody);
+                                axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
+                                    .then(function (resp) {
+                                        console.log('shark api class resp', resp);
+                                        axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                            user: app.sharedFlag ? '' : app.user.name,
+                                            ontology: 'carex'
+                                        })
+                                            .then(function (resp) {
+                                                console.log('save api resp', resp);
+                                            });
+                                    });
+                                app.storeCharacter();
+                            }
+                        });
+                        
+                }
+                var secondChecked = false;
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + app.lastCharacter.toLowerCase())
                     .then(function(resp){
                         console.log('term?'+app.lastCharacter, resp.data);
@@ -2150,9 +2160,32 @@
                             app.nounUndefined = true;
                         }
                         else {
-                            app.storeCharacter();
+                            if (app.middleCharacter != 'between' || secondChecked){
+                                app.storeCharacter();
+                            }
+                            else{
+                                secondChecked = true;
+                            }
                         }
                     });
+                    
+                if (app.middleCharacter == 'between'){
+                    axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + app.secondLastCharacter.toLowerCase())
+                        .then(function(resp){
+                            console.log('term?'+app.secondLastCharacter, resp.data);
+                            if (!resp.data.entries.length){
+                                app.secondNounUndefined = true;
+                            }
+                            else {
+                                if (secondChecked){
+                                    app.storeCharacter();
+                                }
+                                else{
+                                    secondChecked = true;
+                                }
+                            }
+                        });
+                }
 
             },
             colorValueCell(colorDetails){
@@ -2229,6 +2262,9 @@
                 var app = this;
                 app.character = {};
                 app.character.name = app.firstCharacter + ' ' + app.middleCharacter + ' ' + app.lastCharacter;
+                if (app.middleCharacter == 'between'){
+                    app.character.name += ' and ' + app.secondLastCharacter;
+                }
                 app.character.username = app.user.name;
                 app.characterUsername = app.user.name;
                 app.character.standard = 0;
@@ -2530,7 +2566,7 @@
                 var app = this;
                 console.log('app.character = ', app.character);
                 console.log('metadataFlag', metadataFlag);
-
+                app.saveCharacterButtonFlag = true;
                 app.methodFieldData.fromTerm = null;
                 app.methodFieldData.fromId = null;
                 app.methodFieldData.toTerm = null;
@@ -2600,7 +2636,7 @@
                                     }
 
                                 }
-                                if (app.methodFieldData.fromId == null) {
+                                if (app.methodFieldData.fromId == null && (!app.character.method_greenTick || !app.character.method_greenTick.from)) {
                                     checkMethod = false;
                                     app.methodFieldData.fromNeedMore = true;
                                     app.methodFieldData.fromSynonyms = resp.data.entries;
@@ -2639,7 +2675,7 @@
                                     }
 
                                 }
-                                if (app.methodFieldData.toId == null) {
+                                if (app.methodFieldData.toId == null && (!app.character.method_greenTick || !app.character.method_greenTick.to)) {
                                     checkMethod = false;
                                     app.methodFieldData.toNeedMore = true;
                                     app.methodFieldData.toSynonyms = resp.data.entries;
@@ -2676,7 +2712,7 @@
                                     }
 
                                 }
-                                if (app.methodFieldData.includeId == null) {
+                                if (app.methodFieldData.includeId == null && (!app.character.method_greenTick || !app.character.method_greenTick.include)) {
                                     checkMethod = false;
                                     app.methodFieldData.includeNeedMore = true;
                                     app.methodFieldData.includeSynonyms = resp.data.entries;
@@ -2714,7 +2750,7 @@
                                     }
 
                                 }
-                                if (app.methodFieldData.excludeId == null) {
+                                if (app.methodFieldData.excludeId == null && (!app.character.method_greenTick || !app.character.method_greenTick.exclude)) {
                                     checkMethod = false;
                                     app.methodFieldData.excludeNeedMore = true;
                                     app.methodFieldData.excludeSynonyms = resp.data.entries;
@@ -2752,7 +2788,7 @@
                                     }
 
                                 }
-                                if (app.methodFieldData.whereId == null) {
+                                if (app.methodFieldData.whereId == null && (!app.character.method_greenTick || !app.character.method_greenTick.where)) {
                                     checkMethod = false;
                                     app.methodFieldData.whereNeedMore = true;
                                     app.methodFieldData.whereSynonyms = resp.data.entries;
@@ -2967,9 +3003,8 @@
                             app.showDetails('unit', app.metadataFlag);
                         }
                     }
+                    app.saveCharacterButtonFlag = false;
                 }, 100)
-
-
             },
             use(characterId) {
                 var app = this;
@@ -3628,6 +3663,9 @@
                         if (app.checkValueArray(tempValueArray)) {
                             
                             var currentCharacter = app.userCharacters.find(ch => ch.id == filteredValues[0].character_id);
+                            if (!currentCharacter.name.split(' of ')[1]){
+                                currentCharacter.name = currentCharacter.name.replace(' between ', ' of ');
+                            }
                             var char_name = currentCharacter.name.split(' of ')[1].toLowerCase().split(' in ')[0];
                             const temp = char_name;
                             char_name = char_name.charAt(0).toUpperCase() + char_name.slice(1);
@@ -3654,9 +3692,7 @@
                                                 tempRpArray.push(tempValueArray[l]);
                                             }
                                         }
-
                                         
-
                                         tempRpArray.sort((a, b) => a - b);
                                         var minValue = tempRpArray[0];
                                         var maxValue = tempRpArray[tempRpArray.length - 1];
@@ -4358,8 +4394,29 @@
                                 alert('Error occurred while exporting csv file!');
                             }
                         });
-                }, 2000);
+                }, 1000);
+                $.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term='+app.taxonName.toLowerCase().replace(' ','%20'),{},function(resp){
 
+                    let idNode = resp.getElementsByTagName("Id")[0];
+
+                    let id = idNode ? idNode.childNodes[0].nodeValue : "unknown";
+
+                    axios.post('/chrecorder/public/api/v1/export-description-trig',
+                    {
+                        id:id
+                    })
+                    .then(function(resp) {
+                        console.log(resp.data);
+                        if (resp.data.is_success == 1) {
+                            let a = document.createElement('a');
+                            a.href = resp.data.doc_url;
+                            a.download = resp.data.doc_url.split('/')[resp.data.doc_url.split('/').length - 1];
+                            a.click();
+                        } else {
+                            alert('Error occurred while exporting trig file!');
+                        }
+                    });
+                });
             },
             checkValueArray(tempArray) {
                 var app = this;
@@ -4994,6 +5051,8 @@
                 app.currentNonColorValue.confirmedFlag = {
                     main_value: false,
                 };
+                app.currentColorValue.value = value.value;
+                app.currentNonColorValue.value = value.value;
                 app.existColorDetails = [];
                 app.existNonColorDetails = [];
                 app.colorDetails = [];
@@ -5319,6 +5378,12 @@
 //                }
 
                 if (flag == 'main_value') {
+                    
+                    if (app.userNonColorDefinition['main_value']==' ')
+                        app.userNonColorDefinition['main_value']='';
+                    if (app.nonColorSampleText['main_value']==' ')
+                        app.nonColorSampleText['main_value']='';
+                        
                     app.currentNonColorValue.confirmedFlag['main_value'] = false;
                     if (!app.textureTreeData){
                         axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText)
@@ -5787,7 +5852,8 @@
                 app.currentNonColorValue.main_value = nonColorDetails.main_value;
                 app.currentNonColorValue.post_constraint = nonColorDetails.post_constraint;
                 app.currentNonColorValue.confirmedFlag['main_value'] = true;
-                app.nonColorDefinition
+                app.nonColorSampleText['main_value'] = ' ';
+                app.userNonColorDefinition['main_value'] = ' ';
                 app.nonColorDetailsFlag = true;
             },
             copyValuesToOther(value) {
@@ -5938,7 +6004,7 @@
                         }
                     }
                     console.log('app.nonColorationData', app.nonColorationData);
-                    app.updateDescription();
+                    //app.updateDescription();
                 });
             console.log('standard_characters');
             axios.get('/chrecorder/public/api/v1/standard_characters')

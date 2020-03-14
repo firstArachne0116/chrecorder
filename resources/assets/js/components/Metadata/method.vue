@@ -5,9 +5,7 @@
             <br/>
         </div>
         <div class="col-md-12" v-if="!methodEntry">
-            The images will be displayed soon.
-            Please wait until the images are displayed.
-            It will take more than few seconds...
+            Loading...
         </div>
         <div v-if="methodEntry">
             <!--<div class="col-md-12" v-if="noneMethod == false && methodArray.length > 0">
@@ -373,11 +371,16 @@
                 };
 
                 app.greenTick[app.currentSetting] = true;
+                if (!app.childData[10]){
+                    app.childData[10] = {};
+                }
+                app.childData[10][app.currentSetting] = true;
+                app.handleDataFc();
                 app.formViewFlag[app.currentSetting] = false;
                 app.needMoreGreen[app.currentSetting] = true;
                 app.newTermDefinition = null;
                 axios.post('http://shark.sbs.arizona.edu:8080/class', jsonRequest)
-                    .then(function (resp) {
+                    .then(async function (resp) {
                         console.log('class resp', resp);
                         axios.post('http://shark.sbs.arizona.edu:8080/save', {"user": app.sharedFlag? '': app.childData[3].name, "ontology": 'carex'})
                             .then(function (resp) {

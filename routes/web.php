@@ -25,3 +25,4 @@ Route::get('/leader-board', 'HomeController@leaderBoard')->name('home');
 Route::group(['middleware' => ['auth'], 'prefix' => 'admin', 'as' => 'admin.'], function () {
 
 });
+Route::get('logout', '\App\Http\Controllers\Auth\LoginController@logout');

@@ -20,6 +20,7 @@ Route::group([
     Route::post('show-tab-character/{tabName}',         ['as' => 'show_tab_character',          'uses' => 'HomeController@showTabCharacter']);
     Route::post('export-description',                   ['as' => 'export_description',          'uses' => 'HomeController@exportDescription']);
     Route::post('export-description-csv',               ['as' => 'export_description_csv',      'uses' => 'HomeController@exportDescriptionCsv']);
+    Route::post('export-description-trig',              ['as' => 'export_description_trig',     'uses' => 'HomeController@exportDescriptionTrig']);
     Route::post('update-header',                        ['as' => 'update_header',               'uses' => 'HomeController@updateHeader']);
     Route::get('get-usage/{characterId}',               ['as' => 'get_usage',                   'uses' => 'HomeController@getUsage']);
     Route::get('get-color-details/{valueId}',           ['as' => 'get_color_details',           'uses' => 'HomeController@getColorDetails']);
