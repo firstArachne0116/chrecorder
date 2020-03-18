@@ -1807,7 +1807,6 @@
             draggable,
             Loading
         },
-
         methods: {
             handleFcAfterDateBack (event) {
                 console.log('hadleFcAfterDateBack function inited');
@@ -1889,9 +1888,9 @@
                     console.log('selectedCharacter.username', app.character.username.substr(app.character.username.length - app.user.name.length));
 
                     if (app.character.username.includes(app.user.name)) {
-//                        app.viewFlag = false;
-//                        sessionStorage.setItem('viewFlag', false);
-//                        sessionStorage.setItem('edit_created_other', false);
+                    //    app.viewFlag = false;
+                    //    sessionStorage.setItem('viewFlag', false);
+                    //    sessionStorage.setItem('edit_created_other', false);
                         app.editCharacter({character_id: app.character.id}, true);
                     } else {
                         app.viewFlag = true;
@@ -1912,10 +1911,10 @@
                     sessionStorage.setItem('edit_created_other', !editFlag);
                     sessionStorage.setItem('editFlag', editFlag);
                     app.character = app.userCharacters.find(ch => ch.id == character.character_id);
-//                    app.character.standard = 0;
+                //    app.character.standard = 0;
                 } else {
                     app.character = character;
-//                    app.character.standard = 0;
+                //    app.character.standard = 0;
                 }
 
                 console.log('app.character.username', app.character.username);
@@ -2436,7 +2435,7 @@
                 for (var i = 0; i < app.defaultCharacters.length; i++) {
                     var character = app.defaultCharacters[i];
                     if (!app.userCharacters.find(ch => ch.name == character.name) && character.standard == 1) {
-//                        character.username = app.user.name;
+                    //    character.username = app.user.name;
                         character.show_flag = false;
                         if (character.name.startsWith('Length of')
                             || character.name.startsWith('Width of')
@@ -2474,18 +2473,18 @@
                 console.log('characterId', characterId);
                 app.toRemoveCharacterId = characterId;
                 app.toRemoveStandardConfirmFlag = true;
-//                axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
-//                    .then(function (resp) {
-//                        app.toRemoveCharacterId = null;
-//                        app.userCharacters = resp.data.characters;
-//                        app.headers = resp.data.headers;
-//                        app.values = resp.data.values;
-//                        if (app.userCharacters.length == 0) {
-//                            app.matrixShowFlag = false;
-//                        }
-//                        app.refreshUserCharacters();
-//
-//                    });
+            //    axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
+            //        .then(function (resp) {
+            //            app.toRemoveCharacterId = null;
+            //            app.userCharacters = resp.data.characters;
+            //            app.headers = resp.data.headers;
+            //            app.values = resp.data.values;
+            //            if (app.userCharacters.length == 0) {
+            //                app.matrixShowFlag = false;
+            //            }
+            //            app.refreshUserCharacters();
+
+            //        });
 
             },
             confirmRemoveCharacter() {
@@ -2913,7 +2912,7 @@
                                 console.log('class error resp', resp);
                             });
                     }
-//                        });
+                    //    });
                 }
 
                 const awaitTimerID = setInterval(function(){
@@ -3020,8 +3019,8 @@
                       && ch.method_where == app.character.method_where
                      )) {
                         console.log('app.character', app.character);
-//                app.character.show_flag = false;
-                        //app.character.standard = 1;
+            //    app.character.show_flag = false;
+            //             app.character.standard = 1;
                         app.characterUsername = app.character.username;
 
                         var checkFields = true;
@@ -3042,9 +3041,9 @@
                         }
 
                         if (checkFields) {
-//                    if (app.character['id']) {
-//                        delete app.character['id'];
-//                    }
+                //    if (app.character['id']) {
+                //        delete app.character['id'];
+                //    }
                             if (app.checkHaveUnit(app.character.name)) {
                                 app.confirmMethod = true;
                             } else {
@@ -3073,14 +3072,14 @@
                     selectedCharacter = app.userCharacters.find(ch => ch.id == characterId);
                 }
                 console.log('selectedCharacter.username', selectedCharacter.username);
-//                selectedCharacter.username = selectedCharacter.username + ', ' + app.user.name;
-//                app.characterUsername = selectedCharacter.username + ', ' + app.user.name;
+            //    selectedCharacter.username = selectedCharacter.username + ', ' + app.user.name;
+            //    app.characterUsername = selectedCharacter.username + ', ' + app.user.name;
                 app.oldCharacter.method_from = selectedCharacter.method_from;
                 app.oldCharacter.method_to = selectedCharacter.method_to;
                 app.oldCharacter.method_include = selectedCharacter.method_include;
                 app.oldCharacter.method_exclude = selectedCharacter.method_exclude;
                 app.oldCharacter.method_where = selectedCharacter.method_where;
-//                app.editFlag = true;
+            //    app.editFlag = true;
                 selectedCharacter.creator = app.user.name + ' via CR';
                 selectedCharacter.standard = 0;
                 app.detailsFlag = false;
@@ -3136,8 +3135,8 @@
                     .then(function (resp) {
                         console.log('getCharacter', resp);
                         var currentCharacters = resp.data.characters;
-//                        app.character.standard = 0;
-//                        app.character.username = app.characterUsername;
+                    //    app.character.standard = 0;
+                    //    app.character.username = app.characterUsername;
                         if (currentCharacters.find(ch => ch.name == app.character.name
                             && ch.method_from == app.character.method_from
                             && ch.method_to == app.character.method_to
@@ -3462,18 +3461,18 @@
                 }
                 app.isLoading = false;
 
-//                 axios.post('/chrecorder/public/api/v1/show-tab-character/' + tagName)
-//                     .then(function (resp) {
-//                         app.isLoading = false;
-//                         app.userCharacters = resp.data.characters;
-//                         app.headers = resp.data.headers;
-//                         app.values = resp.data.values;
-//                         console.log('values', app.values);
-//                         console.log('headers', app.headers);
-// //                        var height = $('.cr-table').height();
-// //                        $('.table-responsive').css('height', height + 150 + 'px');
-//                         app.refreshUserCharacters();
-//                     });
+                // axios.post('/chrecorder/public/api/v1/show-tab-character/' + tagName)
+                //     .then(function (resp) {
+                //         app.isLoading = false;
+                //         app.userCharacters = resp.data.characters;
+                //         app.headers = resp.data.headers;
+                //         app.values = resp.data.values;
+                //         console.log('values', app.values);
+                //         console.log('headers', app.headers);
+                //     //    var height = $('.cr-table').height();
+                //     //    $('.table-responsive').css('height', height + 150 + 'px');
+                //         app.refreshUserCharacters();
+                //     });
             },
             hideAllCharacter() {
                 var app = this;
@@ -3487,19 +3486,19 @@
                 app.toRemoveCharacterId = characterId;
                 app.toRemoveStandardConfirmFlag = true;
 
-//                axios.post('/chrecorder/public/api/v1/character/delete/' + app.user.id + '/' + characterId)
-//                    .then(function (resp) {
-//                        app.userCharacters = resp.data.characters;
-//                        app.headers = resp.data.headers;
-//                        app.values = resp.data.values;
-//                        app.userTags = resp.data.userTags;
-//                        app.defaultCharacters = resp.data.defaultCharacters;
-//                        if (app.userCharacters.length == 0) {
-//                            app.matrixShowFlag = false;
-//                        }
-//                        app.refreshUserCharacters();
-//                        app.refreshDefaultCharacters();
-//                    });
+            //    axios.post('/chrecorder/public/api/v1/character/delete/' + app.user.id + '/' + characterId)
+            //        .then(function (resp) {
+            //            app.userCharacters = resp.data.characters;
+            //            app.headers = resp.data.headers;
+            //            app.values = resp.data.values;
+            //            app.userTags = resp.data.userTags;
+            //            app.defaultCharacters = resp.data.defaultCharacters;
+            //            if (app.userCharacters.length == 0) {
+            //                app.matrixShowFlag = false;
+            //            }
+            //            app.refreshUserCharacters();
+            //            app.refreshDefaultCharacters();
+            //        });
             },
             changeUnit(characterId, unit) {
                 var app = this;
@@ -3602,12 +3601,12 @@
                     app.standardCharacters.push(temp);
                 }
             },
-//            expandTable() {
-//                var app = this;
-//                if (app.descriptionFlag != -1) {
-//                    app.descriptionFlag--;
-//                }
-//            },
+            // expandTable() {
+            //     var app = this;
+            //     if (app.descriptionFlag != -1) {
+            //         app.descriptionFlag--;
+            //     }
+            // },
             expandDescription() {
                 var app = this;
                 app.descriptionFlag = !app.descriptionFlag;
@@ -4271,7 +4270,7 @@
                 // arrayColorValues.sort((a, b) => (a.brightness&&a.brightness!='')?((a.brightness == 'light') ? -1 : 1):0);
                 // arrayColorValues.sort((a, b) => (a.brightness&&a.brightness!='')?((a.brightness == 'bright') ? -1 : 1):0);
                 // arrayColorValues.sort((a, b) => (a.saturation != '' && a.saturation != null) ? -1 : 1);
-//                arrayColorValues.sort((a, b) => (a.colored.split(' ').length > b.colored.split(' ').length) ? -1 : 1);
+            //    arrayColorValues.sort((a, b) => (a.colored.split(' ').length > b.colored.split(' ').length) ? -1 : 1);
 
                 arrayColorValues.sort(function (x, y) {
                     return x.colored == 'white' ? -1 : y.colored == 'white' ? 1 : 0;
@@ -4377,9 +4376,7 @@
                         }
 
                     });
-                setTimeout(function() {
-                    console.log('app.userTags', app.userTags);
-                    axios.post('/chrecorder/public/api/v1/export-description-csv',
+                axios.post('/chrecorder/public/api/v1/export-description-csv',
                         {
                             userCharacters: app.userCharacters,
                             values: app.values,
@@ -4394,7 +4391,6 @@
                                 alert('Error occurred while exporting csv file!');
                             }
                         });
-                }, 1000);
                 $.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term='+app.taxonName.toLowerCase().replace(' ','%20'),{},function(resp){
 
                     let idNode = resp.getElementsByTagName("Id")[0];
@@ -4603,7 +4599,7 @@
                             }
                         }
                         console.log('postFlag', postFlag);
-//                }
+            //    }
                         if (postFlag == true) {
                             axios.post('/chrecorder/public/api/v1/save-color-value', postValue)
                                 .then(function (resp) {
@@ -4644,8 +4640,8 @@
                 }
 
 
-//                for (var i = 0; i < app.colorDetails.length; i++) {
-//                  }
+            //    for (var i = 0; i < app.colorDetails.length; i++) {
+            //      }
 
             },
             removeColorValue() {
@@ -4703,7 +4699,7 @@
                             });
                     } else {
                         console.log('postFlag', postFlag);
-    //                for (var i = 0; i < app.nonColorDetails.length; i++) {
+                //    for (var i = 0; i < app.nonColorDetails.length; i++) {
                         var postValue = {};
                         postValue['value_id'] = app.currentNonColorValue['value_id'];
                         if (app.currentNonColorValue.id) {
@@ -4717,22 +4713,22 @@
                         postValue['main_value'] = app.currentNonColorValue.main_value;
                         var requestBody = {};
                         if (app.currentNonColorValue['main_value'] != null && app.currentNonColorValue['main_value'] != '') {
-    //                            if (app.currentNonColorValue['main_value'].endsWith('(user defined)') && postFlag == true) {
+                            //    if (app.currentNonColorValue['main_value'].endsWith('(user defined)') && postFlag == true) {
                             console.log('a1');
                             if ((app.searchNonColorFlag == 0 || app.searchNonColorFlag ==1 && app.currentNonColorValue['main_value'] == app.defaultNonColorValue) && postFlag == true) {
                                 console.log('a2');
-    //                                if (app.userNonColorDefinition['main_value'] == ''
-    //                                    || app.userNonColorDefinition['main_value'] == null
-    //                                    || app.userNonColorDefinition['main_value'] == undefined
-    //                                    || app.nonColorSampleText['main_value'] == ''
-    //                                    || app.nonColorSampleText['main_value'] == null
-    //                                    || app.nonColorSampleText['main_value'] == undefined
-    //                                    || app.nonColorTaxon['main_value'] == ''
-    //                                    || app.nonColorTaxon['main_value'] == null
-    //                                    || app.nonColorTaxon['main_value'] == undefined) {
-    //                                    postFlag = false;
-    //                                } else if (postFlag == true) {
-    //                                    postValue['main_value'] = app.currentNonColorValue['main_value'].substr(0, app.currentNonColorValue['main_value'].length - 14);
+                                //    if (app.userNonColorDefinition['main_value'] == ''
+                                //        || app.userNonColorDefinition['main_value'] == null
+                                //        || app.userNonColorDefinition['main_value'] == undefined
+                                //        || app.nonColorSampleText['main_value'] == ''
+                                //        || app.nonColorSampleText['main_value'] == null
+                                //        || app.nonColorSampleText['main_value'] == undefined
+                                //        || app.nonColorTaxon['main_value'] == ''
+                                //        || app.nonColorTaxon['main_value'] == null
+                                //        || app.nonColorTaxon['main_value'] == undefined) {
+                                //        postFlag = false;
+                                //    } else if (postFlag == true) {
+                                //        postValue['main_value'] = app.currentNonColorValue['main_value'].substr(0, app.currentNonColorValue['main_value'].length - 14);
                                 if ( !app.nonColorExistFlag ){
                                     if ( app.userNonColorDefinition['main_value']=='' || app.userNonColorDefinition['main_value'] == null || app.userNonColorDefinition['main_value'] == undefined){
                                         alert('please enter definition');
@@ -4778,7 +4774,7 @@
                                         }
                                     });
 
-    //                                }
+                                //    }
 
                             } else if (app.searchNonColorFlag == 1 && postFlag == true) {
                                 console.log('a3');
@@ -4854,7 +4850,7 @@
                             // }
                         }
 
-    //                }
+                //    }
 
                         if (postFlag == true) {
                             console.log('a6');
@@ -4866,14 +4862,14 @@
                                     app.postList = resp.data.postList;
                                     app.nonColorDetails = resp.data.nonColorDetails;
                                     app.allNonColorValues = resp.data.allNonColorValues;
-    //                                    app.currentNonColorValue = {
-    //                                        detailsFlag: null,
-    //                                        value_id: app.currentNonColorValue.value_id,
-    //                                        placeholderName: app.currentNonColorValue.placeholderName
-    //                                    };
+                                    //    app.currentNonColorValue = {
+                                    //        detailsFlag: null,
+                                    //        value_id: app.currentNonColorValue.value_id,
+                                    //        placeholderName: app.currentNonColorValue.placeholderName
+                                    //    };
                                     app.currentNonColorValue.detailsFlag = null;
-    //                                app.currentNonColorValue.value_id = app.currentNonColorValue.value_id;
-    //                                app.currentNonColorValue.placeholderName = app.currentNonColorValue.placeholderName;
+                                //    app.currentNonColorValue.value_id = app.currentNonColorValue.value_id;
+                                //    app.currentNonColorValue.placeholderName = app.currentNonColorValue.placeholderName;
                                     if (newFlag == false) {
                                         app.nonColorDetailsFlag = false;
                                     } else {
@@ -5229,23 +5225,23 @@
                 //     $(":input").css('background', '#ffffff');
                 //     event.target.style.background = '#82c8fa';
                 // }
-//                color.detailFlag = null;
-                // app.colorExistFlag = false;
+            //    color.detailFlag = null;
+            //     app.colorExistFlag = false;
                 if (!color.detailFlag){
                     app.$store.state.colorTreeData = {};
                 }
                 color.detailFlag = flag;
                 app.currentColorValue.confirmedFlag[flag] = false;
                 app.colorSynonyms[flag] = undefined;
-//                if (!color.id) {
-//                    app.colorDetails[app.colorDetails.length - 1][flag] = '';
-//                } else {
-//                    for (var i = 0; i < app.colorDetails.length; i++) {
-//                        if (app.colorDetails[i].id == color.id) {
-//                            app.colorDetails[i][flag] = '';
-//                        }
-//                    }
-//                }
+            //    if (!color.id) {
+            //        app.colorDetails[app.colorDetails.length - 1][flag] = '';
+            //    } else {
+            //        for (var i = 0; i < app.colorDetails.length; i++) {
+            //            if (app.colorDetails[i].id == color.id) {
+            //                app.colorDetails[i][flag] = '';
+            //            }
+            //        }
+            //    }
 
                 if (app.checkHaveColorValueSet(flag)) {
                     color.detailFlag = ' ';
@@ -5270,7 +5266,7 @@
                                 console.log('color', color);
                                 if (color.id) {
                                     app.colorDetailId = color.id;
-    //                                color.detailFlag = flag;
+                                //    color.detailFlag = flag;
                                     app.colorDetails.find(eachColor => eachColor.id == app.colorDetailId).detailFlag = flag;
                                     for (var i = 0; i < app.colorDetails.length; i++) {
                                         if (app.colorDetails[i].id == color.id) {
@@ -5373,9 +5369,9 @@
                 if (flag == 'negation') {
                     event.target.placeholder = '';
                 }
-//                } else if (flag == 'main_value') {
-//                    event.target.placeholder = searchText[0];
-//                }
+            //    } else if (flag == 'main_value') {
+            //        event.target.placeholder = searchText[0];
+            //    }
 
                 if (flag == 'main_value') {
                     
@@ -5513,7 +5509,7 @@
 
                 app.colorSynonyms[flag]=[];
 
-//                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag])
+            //    axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag])
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + color[flag])
                     .then(async function (resp) {
                         console.log(color[flag]);
@@ -5577,7 +5573,7 @@
                 app.nonColorSynonyms = [];
                 app.colorExistFlag = false;
 
-//                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
+            //    axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
                 console.log(nonColor[flag]);
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + nonColor[flag])
                     .then(function (resp) {
@@ -5768,7 +5764,7 @@
                 app.currentNonColorValue.confirmedFlag = {
                     'main_value': false
                 };
-//                app.currentNonColorValue.confirmedFlag['main_value'] = false;
+                // app.currentNonColorValue.confirmedFlag['main_value'] = false;
                 app.currentNonColorValue.placeholderName = tempPlaceholderName;
                 app.currentNonColorValue.detailsFlag = null;
                 // setTimeout(()=>{
@@ -5822,7 +5818,7 @@
                 var app = this;
 
                 app.currentColorValue[flag] = value;
-//                app.currentColorValue[currentFlag] = value;
+            //    app.currentColorValue[currentFlag] = value;
             },
             selectExistDetails(colorDetails) {
                 var app = this;
@@ -6083,6 +6079,5 @@
             sessionStorage.setItem('userId', app.user.id);
         },
     }
-
 
 </script>

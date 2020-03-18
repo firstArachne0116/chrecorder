@@ -22,7 +22,7 @@ function startsWith ($string, $startString)
 { 
     $len = strlen($startString); 
     return (substr($string, 0, $len) === $startString); 
-} 
+}
 
 class HomeController extends Controller
 {
@@ -1897,25 +1897,25 @@ class HomeController extends Controller
 
     public function writeColorDetail($writer, $subject, $col, $graph){
         if ($col->colored) {
-            $writer->addTriple($subject, ":has_hue_value", ":".$col->colored, $graph);
+            $writer->addTriple($subject, ":has_hue_value", ":".str_replace("-","_",$col->colored), $graph);
         }
         if ($col->certainty_constraint) {
-            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".$col->certainty_constraint, $graph);
+            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".str_replace("-","_",$col->certainty_constraint), $graph);
         }
         if ($col->degree_constraint) {
-            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".$col->degree_constraint, $graph);
+            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".str_replace("-","_",$col->degree_constraint), $graph);
         }
         if ($col->brightness) {
-            $writer->addTriple($subject, ":has_brightness_value", ":".$col->brightness, $graph);
+            $writer->addTriple($subject, ":has_brightness_value", ":".str_replace("-","_",$col->brightness), $graph);
         }
         if ($col->reflectance) {
-            $writer->addTriple($subject, ":has_reflectance_value", ":".$col->reflectance, $graph);
+            $writer->addTriple($subject, ":has_reflectance_value", ":".str_replace("-","_",$col->reflectance), $graph);
         }
         if ($col->saturation) {
-            $writer->addTriple($subject, ":has_saturation_value", ":".$col->saturation, $graph);
+            $writer->addTriple($subject, ":has_saturation_value", ":".str_replace("-","_",$col->saturation), $graph);
         }
         if ($col->multi_colored) {
-            $writer->addTriple($subject, ":has_pattern_value", ":".$col->multi_colored, $graph);
+            $writer->addTriple($subject, ":has_pattern_value", ":".str_replace("-","_",$col->multi_colored), $graph);
         }
         if ($col->pre_constraint || $col->post_constraint){
             $writer->addTriple($subject, ":has_value", "\"".$this->getColorDetailText($col)."\"", $graph);
@@ -1924,17 +1924,125 @@ class HomeController extends Controller
 
     public function writeNonColorDetail($writer, $subject, $nonCol, $graph){
         if ($nonCol->main_value) {
-            $writer->addTriple($subject, ":has_value", ":".$nonCol->main_value, $graph);
+            $writer->addTriple($subject, ":has_value", ":".str_replace("-","_",$nonCol->main_value), $graph);
         }
         if ($nonCol->certainty_constraint) {
-            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".$nonCol->certainty_constraint, $graph);
+            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".str_replace("-","_",$nonCol->certainty_constraint), $graph);
         }
         if ($nonCol->degree_constraint) {
-            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".$nonCol->degree_constraint, $graph);
+            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".str_replace("-","_",$nonCol->degree_constraint), $graph);
         }
         if ($nonCol->pre_constraint || $nonCol->post_constraint){
             $writer->addTriple($subject, ":has_value", "\"".$this->getNonColorDetailText($nonCol)."\"", $graph);
         }
+    }
+
+    public function pluralToSingle($word){
+        $plurals = [
+            'plants' => 'plant',
+            'internodes' => 'internode',
+            'rhizomes' => 'rhizome',
+            'stems' => 'stem',
+            'leaves' => 'leaf',
+            'blades' => 'blade',
+            'margins' => 'margin',
+            'surface' => 'surface',
+            'sheaths' => 'sheath',
+            'ligules' => 'ligule',
+            'apex' => 'apex',
+            'scales' => 'scale',
+            'veins' => 'vein',
+            'stipe' => 'stipe',
+            'beak' => 'beak',
+            'teeth' => 'tooth',
+            'perigynia' => 'perigynium',
+            'stigmas' => 'stigma',
+            'achenes' => 'achene',
+            'anthers' => 'anther',
+            'shoots' => 'shoot',
+            'branches' => 'branch',
+            'roots' => 'root',
+            'culms' => 'culm',
+            'midrib' => 'midrib',
+            'bands' => 'band',
+            'inflorescences' => 'inflorescence',
+            'axis' => 'axis',
+            'nodes' => 'node',
+            'peduncles' => 'peduncle',
+            'bracts' => 'bract',
+            'rachis' => 'rachis',
+            'spikes' => 'spike',
+            'sides' => 'side',
+            'styles' => 'style',
+            'stamens' => 'stamen',
+            'filaments' => 'filament',
+            'cataphylls' => 'cataphyll',
+            'flowers' => 'flower',
+            'nerves' => 'nerve',
+            'unit' => 'unit',
+            'body' => 'body',
+            'orifice' => 'orifice',
+        ];
+        if (array_key_exists($word,$plurals)){
+            return $plurals[$word];
+        }
+        if (substr($word, strlen($word) - 1) == "s"){
+            return substr($word, 0, strlen($word) - 1);
+        }
+        return $word;
+    }
+
+    public function partNameConverter($partName){
+        $word = explode('_of_', explode('_in_', $partName)[0])[0];
+        return $this->pluralToSingle($word) . substr($partName, strlen($word));
+    }
+
+    public function registerType($writer, &$types, $type, $sampleName, $graph, $ccs){
+        $a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+        $i = 2;
+        if (!array_search($type, $types)){
+            array_push($types, $type);
+            $newType = explode('_of_',explode('_in_', $type)[0])[0];
+            $writer->addTriple($ccs.$type, $a, ":".$this->partNameConverter($newType), $graph);
+            while (strlen($newType) != strlen($type)){
+                $partOf = $this->partNameConverter(substr($type, strlen($newType) + 4));
+                $writer->addTriple($ccs.$type, ":part_of", $ccs.$partOf, $graph);
+                $type = $partOf;
+                $newType = explode('_of_',explode('_in_', $type)[0])[0];
+                $writer->addTriple($ccs.$type, $a, ":".$this->partNameConverter($newType), $graph);
+                $i --;
+                if (!$i)return;
+            }
+        }
+    }
+
+    public function registerPartName($writer, &$partNames, &$types, $charName, $qualityName, $sampleName, $graph, $ccs) {
+        $a = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+        if (strstr($charName,'plant')){
+            $writer->addTriple($sampleName, ':has_quality', $ccs.$charName, $graph);
+        }
+        else {
+            $partName = explode('_of_', $charName)[1];
+            $partName = $this->partNameConverter($partName);
+            if (!array_search($partName, $partNames)){
+                array_push($partNames, $partName);
+                $writer->addTriple($sampleName, ':has_part', $ccs.$partName, $graph);
+                $this->registerType($writer, $types, $partName, $sampleName, $graph, $ccs);
+            }
+            $writer->addTriple($ccs.$partName, ':has_quality', $ccs.$qualityName, $graph);
+        }
+        $writer->addTriple($ccs.$qualityName, $a, ":$charName", $graph);
+    }
+
+    public function checkHavingUnit($charName) {
+        return startsWith($charName, 'length_of_')
+        || startsWith($charName, 'width_of_')
+        || startsWith($charName, 'number_of_')
+        || startsWith($charName, 'depth_of_')
+        || startsWith($charName, 'diameter_of_')
+        || startsWith($charName, 'distance_between_')
+        || startsWith($charName, 'count_of_')
+        || startsWith($charName, 'ratio_of_');
     }
 
     public function exportDescriptionTrig(Request $request) {
@@ -1989,6 +2097,7 @@ class HomeController extends Controller
         $index = 0;
         $partNames = [];
         for ($i = $headers->count() - 1 ; $i >= 0 ; $i--) {
+            $types = [];
             $header = $headers[$i];
             if ($header->id == 1){
                 continue;
@@ -2009,101 +2118,54 @@ class HomeController extends Controller
                         $charName = str_replace('-','_',str_replace(' ','_',strtolower($characterName[$sample->character_id])));
                         if (strpos($charName, '_between_') !== false){
                             $charName = str_replace('_between_', '_of_', $charName);
-                        }
-                        $partName = "ccs$index:".explode('_in_',explode('_of_',$charName)[1])[0];
+                        };
                         if ($charName == 'shape_of_stem_in_cross_section'){
                             $charName = 'shape_of_stem_in_transverse_section';
                         }
-                        if (startsWith($charName, 'length_of_')
-                            || startsWith($charName, 'width_of_')
-                            || startsWith($charName, 'number_of_')
-                            || startsWith($charName, 'depth_of_')
-                            || startsWith($charName, 'diameter_of_')
-                            || startsWith($charName, 'distance_between_')
-                            || startsWith($charName, 'count_of_')
-                        ){
-                            if (strstr($charName,'plant')){
-                                $writer->addTriple($sampleName, ':has_quality', "ccs$index:$charName", $graph);
-                            }
-                            else {
-                                if (!array_search($partName, $partNames)){
-                                    array_push($partNames, $partName);
-                                    $writer->addTriple($sampleName, ':has_part', $partName, $graph);
-                                    $writer->addTriple($partName, $a, ":".explode('_in_',explode('_of_',$charName)[1])[0], $graph);
-                                }
-                                $writer->addTriple($partName, ':has_quality', "ccs$index:$charName", $graph);
-                            }
-                            $writer->addTriple("ccs$index:$charName", $a, ":$charName", $graph);
+                        if ($this->checkHavingUnit($charName)){
+                            $this->registerPartName($writer, $partNames, $types, $charName, $charName, $sampleName, $graph, "ccs$index:");
 
                             $sample->value = $sample->value + 0.0;
                             $writer->addTriple("ccs$index:$charName", ":has_value", "\"$sample->value\"^^xsd:float", $graph);
-                            $writer->addTriple("ccs$index:$charName", ":has_unit", "uo:$sample->unit", $graph);
+                            if (!startsWith($charName, 'number_of_')
+                                &&!startsWith($charName, 'count_of_')
+                                &&!startsWith($charName, 'ratio_of_')
+                            ){
+                                $writer->addTriple("ccs$index:$charName", ":has_unit", "uo:$sample->unit", $graph);
+                            }
                         }
-                        else if (startsWith($charName,'color_of_')){
-                            if ($colDetails[$sample->id]) {
-                                $cols = $colDetails[$sample->id];
+                        else {
+                            if ($colDetails[$sample->id] || $nonColDetails[$sample->id]) {
+                                $cols = startsWith($charName,'color_of_') ? $colDetails[$sample->id] : $nonColDetails[$sample->id];
                                 for ($j = 0 ; $j < count($cols) ; $j ++ ) {
                                     if ($cols[$j]->negation){
-                                        $this->writeColorDetail($writer, "ccs$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $cols[$j], $graph);
+                                        $partName = explode('_of_', $charName)[1];
+                                        $partName = $this->partNameConverter($partName);
+                                        if (startsWith($charName,'color_of_')){
+                                            $this->writeColorDetail($writer, "ccs$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $cols[$j], $graph);
+                                        }
+                                        else {
+                                            $this->writeNonColorDetail($writer, "ccs$index:".str_replace(' ','_',$this->getNonColorDetailText($cols[$j])), $cols[$j], 
+                                            $graph);
+                                        }
                                         $writer->addTriple("[]", "rdf:type", "owl:NegativePropertyAssertion", $graph);
-                                        $writer->addTriple("", "owl:sourceIndividual", $partName, $graph);
-                                        $writer->addTriple("", "owl:sourceIndividual", $partName, $graph);
+                                        $writer->addTriple("", "owl:sourceIndividual", "ccs$index:".$partName, $graph);
+                                        $writer->addTriple("", "owl:sourceIndividual", "ccs$index:".$partName, $graph);
                                         $writer->addTriple("", "owl:assertionProperty", ":has_quality", $graph);
                                         $writer->addTriple("", "owl:targetIndividual", ":ccs$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $graph);
                                         continue;
                                     }
-                                    $subjectName = "ccs$index:$charName"."_".($j + 1);
+                                    $qualityName = $charName."_".($j + 1);
                                     if (count($cols) == 1){
-                                        $subjectName = "ccs$index:$charName";
+                                        $qualityName = $charName;
                                     }
-                                    if (strstr($charName,'plant')){
-                                        $writer->addTriple($sampleName, ':has_quality', $subjectName, $graph);
-                                    }
-                                    else {
-                                        if (!array_search($partName, $partNames)){
-                                            array_push($partNames, $partName);
-                                            $writer->addTriple($sampleName, ':has_part', $partName, $graph);
-                                            $writer->addTriple($partName, $a, ":".explode('_in_',explode('_of_',$charName)[1])[0], $graph);
-                                        }
-                                        $writer->addTriple($partName, ':has_quality', $subjectName, $graph);
-                                    }
-                                    $writer->addTriple($subjectName, $a, ":$charName", $graph);
-                                    
-                                    $this->writeColorDetail($writer, $subjectName, $cols[$j], $graph);
-                                }
-                            }
-                        }
-                        else {
-                            if ($nonColDetails[$sample->id]) {
-                                $nonCols = $nonColDetails[$sample->id];
-                                for ($j = 0 ; $j < count($nonCols) ; $j ++ ) {
-                                    if ($nonCols[$j]->negation){
-                                        $this->writeNonColorDetail($writer, "ccs$index:".str_replace(' ','_',$this->getNonColorDetailText($nonCols[$j])), $nonCols[$j], $graph);
-                                        $writer->addTriple("[]", "rdf:type", "owl:NegativePropertyAssertion", $graph);
-                                        $writer->addTriple("", "owl:sourceIndividual", $partName, $graph);
-                                        $writer->addTriple("", "owl:sourceIndividual", $partName, $graph);
-                                        $writer->addTriple("", "owl:assertionProperty", ":has_quality", $graph);
-                                        $writer->addTriple("", "owl:targetIndividual", ":ccs$index:".str_replace(' ','_',$this->getNonColorDetailText($nonCols[$j])), $graph);
-                                        continue;
-                                    }
-                                    $subjectName = "ccs$index:$charName"."_".($j + 1);
-                                    if (count($nonCols) == 1){
-                                        $subjectName = "ccs$index:$charName";
-                                    }
-                                    if (strstr($charName,'plant')){
-                                        $writer->addTriple($sampleName, ':has_quality', $subjectName, $graph);
+                                    $this->registerPartName($writer, $partNames, $types, $charName, $qualityName, $sampleName, $graph, "ccs$index:");
+                                    if (startsWith($charName,'color_of_')){
+                                        $this->writeColorDetail($writer, "ccs$index:".$qualityName, $cols[$j], $graph);
                                     }
                                     else {
-                                        if (!array_search($partName, $partNames)){
-                                            array_push($partNames, $partName);
-                                            $writer->addTriple($sampleName, ':has_part', $partName, $graph);
-                                            $writer->addTriple($partName, $a, ":".explode('_in_',explode('_of_',$charName)[1])[0], $graph);
-                                        }
-                                        $writer->addTriple($partName, ':has_quality', $subjectName, $graph);
+                                        $this->writeNonColorDetail($writer, "ccs$index:".$qualityName, $cols[$j], $graph);
                                     }
-                                    $writer->addTriple($subjectName, $a, ":$charName", $graph);
-                                    
-                                    $this->writeNonColorDetail($writer, $subjectName, $nonCols[$j], $graph);
                                 }
                             }
                         }
