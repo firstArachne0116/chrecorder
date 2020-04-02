@@ -35,6 +35,7 @@ Route::group([
     Route::post('remove-each-non-color-details',        ['as' => 'removeEachNonColorDetails',   'uses' => 'HomeController@removeEachNonColorDetails']);
     Route::post('overwrite-value',                      ['as' => 'overwriteValue',              'uses' => 'HomeController@overwriteValue']);
     Route::post('keep-exist-value',                     ['as' => 'keepExistValue',              'uses' => 'HomeController@keepExistValue']);
+    Route::post('get-default-constraint',                ['as' => 'getDefaultConstraint',        'uses' => 'HomeController@getDefaultConstraint1']);
 
     Route::group([
         'prefix' => '/character',
@@ -42,17 +43,15 @@ Route::group([
     ], function () {
         Route::post('create',                           ['as' => 'create_character',            'uses' => 'HomeController@storeCharacter']);
         Route::post('add-character',                    ['as' => 'add_character',               'uses' => 'HomeController@addCharacter']);
-        Route::get('all',                               ['as' => 'get_all_character',           'uses' => 'HomeController@getAllCharacter']);
         Route::post('update',                           ['as' => 'update_value',                'uses' => 'HomeController@updateValue']);
         Route::post('update-character',                 ['as' => 'update_character',            'uses' => 'HomeController@updateCharacter']);
         Route::post('update-unit',                      ['as' => 'update_unit',                 'uses' => 'HomeController@updateUnit']);
         Route::post('update-summary',                   ['as' => 'update_summary',              'uses' => 'HomeController@updateSummary']);
         Route::post('delete/{userId}/{characterId}',    ['as' => 'delete_character',            'uses' => 'HomeController@deleteCharacter']);
         Route::post('add-standard',                     ['as' => 'add_standard_character',      'uses' => 'HomeController@addStandardCharacter']);
-        Route::get('remove-all-standard',              ['as' => 'remove_all_standard',         'uses' => 'HomeController@removeAllStandard']);
+        Route::get('remove-all-standard',               ['as' => 'remove_all_standard',         'uses' => 'HomeController@removeAllStandard']);
         Route::post('remove-all',                       ['as' => 'remove_all',                  'uses' => 'HomeController@removeAll']);
-
-
+        
         Route::get('usage/{characterId}',               ['as' => 'usage',                       'uses' => 'HomeController@usage']);
         Route::post('delete-header/{headerId}',         ['as' => 'delete-header',               'uses' => 'HomeController@deleteHeader']);
         Route::post('change-order',                     ['as' => 'change-order',                'uses' => 'HomeController@changeOrder']);

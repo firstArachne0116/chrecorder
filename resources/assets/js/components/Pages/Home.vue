@@ -357,6 +357,7 @@
                                                             <option value="Color">Color</option>
                                                             <option value="Shape">Shape</option>
                                                             <option value="Texture">Texture</option>
+                                                            <option value="Growth Form">Growth Form</option>
                                                         </datalist>
                                                         <!--<select v-model="firstCharacter" style="height: 26px;">-->
                                                         <!--<option>Length</option>-->
@@ -743,75 +744,6 @@
 
                                                 </div>
                                             </div>
-
-                                            <!-- <div v-if="colorDetails.length > 0"
-                                                style="border-radius: 5px; border: 1px solid; padding: 15px; margin-top: 10px;">
-                                                <div style="float: right;">
-                                                    <a class="btn btn-primary" v-if="currentColorValueExist == false"
-                                                    v-on:click="currentColorValueExist = true;">
-                                                        <span class="glyphicon glyphicon-chevron-down"></span>
-                                                    </a>
-                                                    <a class="btn btn-primary" v-if="currentColorValueExist == true"
-                                                    v-on:click="currentColorValueExist = false;">
-                                                        <span class="glyphicon glyphicon-chevron-up"></span>
-                                                    </a>
-                                                </div>
-                                                <div>
-                                                    <b>Current values</b>
-                                                </div>
-                                                <div v-for="(eachColor, index) in colorDetails"
-                                                    v-if="currentColorValueExist == true" style="margin-top: 5px;"
-                                                    class="row">
-                                                    <div class="col-md-6">
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.negation != null">
-                                                            {{ eachColor.negation }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.pre_constraint != null">
-                                                            {{ eachColor.pre_constraint }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.certainty_constraint != null">
-                                                            {{ eachColor.certainty_constraint }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.degree_constraint != null">
-                                                            {{ eachColor.degree_constraint }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.brightness != null">
-                                                            {{ eachColor.brightness }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.reflectance != null">
-                                                            {{ eachColor.reflectance }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.saturation != null">
-                                                            {{ eachColor.saturation }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.colored != null">
-                                                            {{ eachColor.colored }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.multi_colored != null">
-                                                            {{ eachColor.multi_colored }}
-                                                        </div>
-                                                        <div style="display: inline-block;"
-                                                            v-if="eachColor.post_constraint != null">
-                                                            {{ eachColor.post_constraint }}
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <a class="btn btn-primary" style="padding: 3px 6px;"
-                                                        v-on:click="editEachColor(eachColor)">Edit</a>
-                                                        <a class="btn btn-primary" style="padding: 3px 6px;"
-                                                        v-on:click="removeEachColor(eachColor)">Remove</a>
-                                                    </div>
-                                                </div>
-                                            </div> -->
 
                                         </div>
 
@@ -1519,6 +1451,14 @@
     }
     
     
+    function makeBaseAuth(user, pswd){ 
+        var token = user + ':' + pswd;
+        var hash = "";
+        if (btoa) {
+            hash = btoa(token);
+        }
+        return "Basic " + hash;
+    }
     var inactivityTimeout = null;
     resetTimeout()
     function onUserInactivity() {
@@ -5218,30 +5158,12 @@
                 app.colorSearchText = '';
                 app.nonColorSearchText = '';
 
-                //console.log('event.target', event.target);
-                // if (flag == 'negation') {
-                //     event.target.placeholder = '';
-                // } else if (app.checkHaveColorValueSet(flag)) {
-                //     $(":input").css('background', '#ffffff');
-                //     event.target.style.background = '#82c8fa';
-                // }
-            //    color.detailFlag = null;
-            //     app.colorExistFlag = false;
                 if (!color.detailFlag){
                     app.$store.state.colorTreeData = {};
                 }
                 color.detailFlag = flag;
                 app.currentColorValue.confirmedFlag[flag] = false;
                 app.colorSynonyms[flag] = undefined;
-            //    if (!color.id) {
-            //        app.colorDetails[app.colorDetails.length - 1][flag] = '';
-            //    } else {
-            //        for (var i = 0; i < app.colorDetails.length; i++) {
-            //            if (app.colorDetails[i].id == color.id) {
-            //                app.colorDetails[i][flag] = '';
-            //            }
-            //        }
-            //    }
 
                 if (app.checkHaveColorValueSet(flag)) {
                     color.detailFlag = ' ';
@@ -5365,6 +5287,9 @@
                 }
                 searchText = searchText.replace(' ', '-');
 
+                // if (searchText == 'relationship'){
+                //     searchText = 'relational quality';
+                // }
                 console.log('searchText', searchText);
                 if (flag == 'negation') {
                     event.target.placeholder = '';
@@ -5651,7 +5576,6 @@
                 app.currentNonColorValue['main_value'] = node.data.text;
                 app.defaultNonColorValue = node.data.text;
                 app.searchNonColorFlag = 0;
-
             },
             checkHaveColorValueSet(text) {
                 if (text == 'brightness'
@@ -5958,52 +5882,10 @@
             },
 
         },
-        created() {
+        async created() {
             var app = this;
-            axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=quality')
-                .then(function (resp) {
-                    console.log('colorationData', resp.data);
-                    var colorData = resp.data.children.find(ch=>ch.text=="coloration").children[0].children;
-                    for (var i = 0; i < colorData.length; i++) {
-                        app.colorationData[colorData[i]['text']] = [];
-                        app.colorationData[colorData[i]['text']].push(colorData[i]['text']);
-                        if ('children' in colorData[i]) {
-                            for (var j = 0; j < colorData[i].children.length; j++) {
-                                app.colorationData[colorData[i]['text']].push(colorData[i].children[j].text);
-                            }
-                        }
-                    }
-                    
-                    var qualityData = resp.data.children;
-                    for (var i = 0; i < qualityData.length; i++) {
-                        if (qualityData[i].text=='coloration') {
-                            continue;
-                        }
-                        app.nonColorationData[qualityData[i]['text']] = {};
-                        if ('children' in qualityData[i]) {
-                            for (var j = 0; j < qualityData[i].children.length; j++) {
-                                app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text]=[];
-                                app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text].push(qualityData[i].children[j].text);
-                                
-                                if ('children' in qualityData[i].children[j]) {
-                                    for (var k = 0; k < qualityData[i].children[j].children.length; k++) {
-                                        app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text].push(qualityData[i].children[j].children[k].text);
-
-                                        if ('children' in qualityData[i].children[j].children[k]) {
-                                            for (var l = 0; l < qualityData[i].children[j].children[k].children.length; l++) {
-                                                app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text].push(qualityData[i].children[j].children[k].children[l].text);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    console.log('app.nonColorationData', app.nonColorationData);
-                    //app.updateDescription();
-                });
             console.log('standard_characters');
-            axios.get('/chrecorder/public/api/v1/standard_characters')
+            await axios.get('/chrecorder/public/api/v1/standard_characters')
                 .then(function (resp) {
                     console.log('standardCharacters', resp);
                     app.defaultCharacters = resp.data;
@@ -6064,6 +5946,48 @@
                         });
                 });
 
+            axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=quality')
+                .then(function (resp) {
+                    console.log('colorationData', resp.data);
+                    var colorData = resp.data.children.find(ch=>ch.text=="coloration").children[0].children;
+                    for (var i = 0; i < colorData.length; i++) {
+                        app.colorationData[colorData[i]['text']] = [];
+                        app.colorationData[colorData[i]['text']].push(colorData[i]['text']);
+                        if ('children' in colorData[i]) {
+                            for (var j = 0; j < colorData[i].children.length; j++) {
+                                app.colorationData[colorData[i]['text']].push(colorData[i].children[j].text);
+                            }
+                        }
+                    }
+                    
+                    var qualityData = resp.data.children;
+                    for (var i = 0; i < qualityData.length; i++) {
+                        if (qualityData[i].text=='coloration') {
+                            continue;
+                        }
+                        app.nonColorationData[qualityData[i]['text']] = {};
+                        if ('children' in qualityData[i]) {
+                            for (var j = 0; j < qualityData[i].children.length; j++) {
+                                app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text]=[];
+                                app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text].push(qualityData[i].children[j].text);
+                                
+                                if ('children' in qualityData[i].children[j]) {
+                                    for (var k = 0; k < qualityData[i].children[j].children.length; k++) {
+                                        app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text].push(qualityData[i].children[j].children[k].text);
+
+                                        if ('children' in qualityData[i].children[j].children[k]) {
+                                            for (var l = 0; l < qualityData[i].children[j].children[k].children.length; l++) {
+                                                app.nonColorationData[qualityData[i]['text']][qualityData[i].children[j].text].push(qualityData[i].children[j].children[k].children[l].text);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    console.log('app.nonColorationData', app.nonColorationData);
+                    //app.updateDescription();
+                });
             axios.get("/chrecorder/public/api/v1/user-tag/" + app.user.id)
                 .then(function (resp) {
                     resp.data.sort((a,b) => app.tagOrder(a)-app.tagOrder(b));
@@ -6071,6 +5995,24 @@
                     if (app.userTags[0])app.showTableForTab(app.userTags[0].tag_name);
                     console.log('userTags', app.userTags);
                 });
+
+            var url = 'https://shark.sbs.arizona.edu:8443/bigdata/sparql';
+
+            var query = 'SELECT ?s ?p ?o { ?s ?p ?o . }';
+            var settings = {
+                method: 'POST',
+                data: { 'query': query },
+                withCredentials: true,
+                headers: { 'Authorization': makeBaseAuth('blazegraph', 'dDhc5XwGtg9vZWDjGb1r') },
+                success: function success(data) {
+                    console.log(data);
+                },
+                error: function error(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.responseText);
+                }
+            };
+
+            $.ajax(url, settings);
         },
         mounted() {
             var app = this;

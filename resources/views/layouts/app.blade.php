@@ -157,13 +157,17 @@
                             </div>
                         </a>
                     </div>
+                    <div class="col-md-6">
+                    </div>
                     <div class="col-md-3">
-                        <a id="explore-character" href="{{ url('/explore-character') }}" style="text-decoration: none;">
-                            <div style="height: 34px; padding-top: 8px">
-                                <span class="glyphicon glyphicon-list" style="font-size: 20px"></span>
-                                <div class="explore">Explore Character Data</div>
-                            </div>
-                        </a>
+                        <div style="float: right">
+                            <a id="explore-character" href="{{ url('/explore-character') }}" style="text-decoration: none;">
+                                <div style="height: 34px; padding-top: 8px">
+                                    <span class="glyphicon glyphicon-list" style="font-size: 20px"></span>
+                                    <div class="explore">Explore Character Data</div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

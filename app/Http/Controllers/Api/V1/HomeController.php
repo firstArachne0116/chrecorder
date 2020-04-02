@@ -1495,7 +1495,52 @@ class HomeController extends Controller
     }
 
     public function getDefaultConstraint($characterName) {
-        $characters = Character::where('name', '=', $characterName)->get();
+        $characters = Character::where('name', 'like', $characterName)->get();
+
+        $preList = ['longitudinally'];
+        $postList = ['when young'];
+        foreach ($characters as $eachCharacter) {
+            $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
+            foreach($values as $eachValue) {
+                $details = ColorDetails::where('value_id', '=', $eachValue->id)->get();
+                foreach ($details as $each) {
+                    if ($each->pre_constraint != null && $each->pre_constraint != '' && $each->pre_constraint != 'undefined' && $each->pre_constraint != 'null') {
+                        if (!in_array($each->pre_constraint, $preList)) {
+                            array_push($preList, $each->pre_constraint);
+                        }
+                    }
+                    if ($each->post_constraint != null && $each->post_constraint != '' && $each->post_constraint != 'undefined' && $each->post_constraint != 'null') {
+                        if (!in_array($each->post_constraint, $postList)) {
+                            array_push($postList, $each->post_constraint);
+                        }
+                    }
+                }
+                $details = NonColorDetails::where('value_id', '=', $eachValue->id)->get();
+                foreach ($details as $each) {
+                    if ($each->pre_constraint != null && $each->pre_constraint != '' && $each->pre_constraint != 'undefined' && $each->pre_constraint != 'null') {
+                        if (!in_array($each->pre_constraint, $preList)) {
+                            array_push($preList, $each->pre_constraint);
+                        }
+                    }
+                    if ($each->post_constraint != null && $each->post_constraint != '' && $each->post_constraint != 'undefined' && $each->post_constraint != 'null') {
+                        if (!in_array($each->post_constraint, $postList)) {
+                            array_push($postList, $each->post_constraint);
+                        }
+                    }
+                }
+            }
+        }
+
+        $data = [
+            'preList' => $preList,
+            'postList' => $postList,
+        ];
+
+        return $data;
+    }
+
+    public function getDefaultConstraint1() {
+        $characters = Character::all();
 
         $preList = ['longitudinally'];
         $postList = ['when young'];
@@ -1897,25 +1942,25 @@ class HomeController extends Controller
 
     public function writeColorDetail($writer, $subject, $col, $graph){
         if ($col->colored) {
-            $writer->addTriple($subject, ":has_hue_value", ":".str_replace("-","_",$col->colored), $graph);
+            $writer->addTriple($subject, ":has_hue_value", ":".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->colored)))), $graph);
         }
         if ($col->certainty_constraint) {
-            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".str_replace("-","_",$col->certainty_constraint), $graph);
+            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->certainty_constraint)))), $graph);
         }
         if ($col->degree_constraint) {
-            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".str_replace("-","_",$col->degree_constraint), $graph);
+            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->degree_constraint)))), $graph);
         }
         if ($col->brightness) {
-            $writer->addTriple($subject, ":has_brightness_value", ":".str_replace("-","_",$col->brightness), $graph);
+            $writer->addTriple($subject, ":has_brightness_value", ":".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->brightness)))), $graph);
         }
         if ($col->reflectance) {
-            $writer->addTriple($subject, ":has_reflectance_value", ":".str_replace("-","_",$col->reflectance), $graph);
+            $writer->addTriple($subject, ":has_reflectance_value", ":".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->reflectance)))), $graph);
         }
         if ($col->saturation) {
-            $writer->addTriple($subject, ":has_saturation_value", ":".str_replace("-","_",$col->saturation), $graph);
+            $writer->addTriple($subject, ":has_saturation_value", ":".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->saturation)))), $graph);
         }
         if ($col->multi_colored) {
-            $writer->addTriple($subject, ":has_pattern_value", ":".str_replace("-","_",$col->multi_colored), $graph);
+            $writer->addTriple($subject, ":has_pattern_value", ":".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$col->multi_colored)))), $graph);
         }
         if ($col->pre_constraint || $col->post_constraint){
             $writer->addTriple($subject, ":has_value", "\"".$this->getColorDetailText($col)."\"", $graph);
@@ -1924,13 +1969,13 @@ class HomeController extends Controller
 
     public function writeNonColorDetail($writer, $subject, $nonCol, $graph){
         if ($nonCol->main_value) {
-            $writer->addTriple($subject, ":has_value", ":".str_replace("-","_",$nonCol->main_value), $graph);
+            $writer->addTriple($subject, ":has_value", ":".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$nonCol->main_value)))), $graph);
         }
         if ($nonCol->certainty_constraint) {
-            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".str_replace("-","_",$nonCol->certainty_constraint), $graph);
+            $writer->addTriple($subject, ":has_certainty_value_modifier", "mo:".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$nonCol->certainty_constraint)))), $graph);
         }
         if ($nonCol->degree_constraint) {
-            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".str_replace("-","_",$nonCol->degree_constraint), $graph);
+            $writer->addTriple($subject, ":has_degree_value_modifier", "mo:".str_replace("(","", str_replace(")","",str_replace(" ", "_", str_replace("-","_",$nonCol->degree_constraint)))), $graph);
         }
         if ($nonCol->pre_constraint || $nonCol->post_constraint){
             $writer->addTriple($subject, ":has_value", "\"".$this->getNonColorDetailText($nonCol)."\"", $graph);
@@ -2045,6 +2090,16 @@ class HomeController extends Controller
         || startsWith($charName, 'ratio_of_');
     }
 
+    public function getSpecimenName($taxon) {
+        $words = explode(' ', strtolower($taxon));
+        $str = '';
+        foreach($words as $word){
+            $str .= substr($word, 0, 1);
+        }
+        
+        return $str.'s';
+    }
+
     public function exportDescriptionTrig(Request $request) {
 
         $user = User::where('id', '=', Auth::id())->first();
@@ -2052,6 +2107,7 @@ class HomeController extends Controller
 
         $fileName = $user->taxon;
         $file = fopen($fileName.".trig", "w") or die("Unable to open file!");
+        $specimenName = $this->getSpecimenName($user->taxon);
 
         $writer = new TriGWriter([
             "prefixes" => [
@@ -2088,7 +2144,7 @@ class HomeController extends Controller
         for ($i = $headers->count() - 1 ; $i >= 0 ; $i--) {
             $header = $headers[$i];
             if ($header->id != 1){
-                $writer->addPrefix('ccs' . $index ++, "http://biosemantics.arizona.edu/kb/".str_replace(' ','/',strtolower($user->taxon))."/" . $header->header. "#");
+                $writer->addPrefix($specimenName . $index ++, "http://biosemantics.arizona.edu/kb/".str_replace(' ','/',strtolower($user->taxon))."/" . $header->header. "#");
             }
         }
 
@@ -2123,15 +2179,15 @@ class HomeController extends Controller
                             $charName = 'shape_of_stem_in_transverse_section';
                         }
                         if ($this->checkHavingUnit($charName)){
-                            $this->registerPartName($writer, $partNames, $types, $charName, $charName, $sampleName, $graph, "ccs$index:");
+                            $this->registerPartName($writer, $partNames, $types, $charName, $charName, $sampleName, $graph, $specimenName.$index.":");
 
                             $sample->value = $sample->value + 0.0;
-                            $writer->addTriple("ccs$index:$charName", ":has_value", "\"$sample->value\"^^xsd:float", $graph);
+                            $writer->addTriple($specimenName."$index:$charName", ":has_value", "\"$sample->value\"^^xsd:float", $graph);
                             if (!startsWith($charName, 'number_of_')
                                 &&!startsWith($charName, 'count_of_')
                                 &&!startsWith($charName, 'ratio_of_')
                             ){
-                                $writer->addTriple("ccs$index:$charName", ":has_unit", "uo:$sample->unit", $graph);
+                                $writer->addTriple($specimenName."$index:$charName", ":has_unit", "uo:$sample->unit", $graph);
                             }
                         }
                         else {
@@ -2142,29 +2198,34 @@ class HomeController extends Controller
                                         $partName = explode('_of_', $charName)[1];
                                         $partName = $this->partNameConverter($partName);
                                         if (startsWith($charName,'color_of_')){
-                                            $this->writeColorDetail($writer, "ccs$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $cols[$j], $graph);
+                                            $this->writeColorDetail($writer, $specimenName."$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $cols[$j], $graph);
                                         }
                                         else {
-                                            $this->writeNonColorDetail($writer, "ccs$index:".str_replace(' ','_',$this->getNonColorDetailText($cols[$j])), $cols[$j], 
-                                            $graph);
+                                            $this->writeNonColorDetail($writer, $specimenName."$index:".str_replace(' ','_',$this->getNonColorDetailText($cols[$j])), $cols[$j], $graph);
                                         }
                                         $writer->addTriple("[]", "rdf:type", "owl:NegativePropertyAssertion", $graph);
-                                        $writer->addTriple("", "owl:sourceIndividual", "ccs$index:".$partName, $graph);
-                                        $writer->addTriple("", "owl:sourceIndividual", "ccs$index:".$partName, $graph);
+                                        $writer->addTriple("", "owl:sourceIndividual", $specimenName."$index:".$partName, $graph);
+                                        $writer->addTriple("", "owl:sourceIndividual", $specimenName."$index:".$partName, $graph);
                                         $writer->addTriple("", "owl:assertionProperty", ":has_quality", $graph);
-                                        $writer->addTriple("", "owl:targetIndividual", ":ccs$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $graph);
+                                        
+                                        if (startsWith($charName,'color_of_')){
+                                            $writer->addTriple("", "owl:targetIndividual", "$specimenName"."$index:".str_replace(' ','_',$this->getColorDetailText($cols[$j])), $graph);
+                                        }
+                                        else {
+                                            $writer->addTriple("", "owl:targetIndividual", "$specimenName"."$index:".str_replace(' ','_',$this->getNonColorDetailText($cols[$j])), $graph);
+                                        }
                                         continue;
                                     }
                                     $qualityName = $charName."_".($j + 1);
                                     if (count($cols) == 1){
                                         $qualityName = $charName;
                                     }
-                                    $this->registerPartName($writer, $partNames, $types, $charName, $qualityName, $sampleName, $graph, "ccs$index:");
+                                    $this->registerPartName($writer, $partNames, $types, $charName, $qualityName, $sampleName, $graph, $specimenName."$index:");
                                     if (startsWith($charName,'color_of_')){
-                                        $this->writeColorDetail($writer, "ccs$index:".$qualityName, $cols[$j], $graph);
+                                        $this->writeColorDetail($writer, $specimenName."$index:".$qualityName, $cols[$j], $graph);
                                     }
                                     else {
-                                        $this->writeNonColorDetail($writer, "ccs$index:".$qualityName, $cols[$j], $graph);
+                                        $this->writeNonColorDetail($writer, $specimenName."$index:".$qualityName, $cols[$j], $graph);
                                     }
                                 }
                             }
@@ -2175,7 +2236,7 @@ class HomeController extends Controller
         }
 
         $txt = $graph . " dc:creator app:". explode('@', $user->email)[0] . ";\n";
-        $txt .= "\t:export_date \"".date("Y-m-d")."T".date("h:i:s")."\" ^^xsd:dateTime.";
+        $txt .= "\t:export_date \"".date("Y-m-d")."T".date("h:i:s")."\"^^xsd:dateTime.";
 
         fwrite($file, $writer->end());
         fwrite($file, $txt);

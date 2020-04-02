@@ -72,43 +72,44 @@ class HomeController extends Controller
 
     public function exploreCharacter()
     {
-        $standardCharacters = StandardCharacter::all();
-        $standardUsages = Character::join('standard_characters','standard_characters.name','=','characters.name')->where('standard_characters.username','=','characters.username')->select('standard_characters.id as id', DB::raw('sum(characters.usage_count) as usage_count'))->groupBy('standard_characters.id')->get();
+        // $standardCharacters = StandardCharacter::all();
+        // $standardUsages = Character::join('standard_characters','standard_characters.name','=','characters.name')->where('standard_characters.username','=','characters.username')->select('standard_characters.id as id', DB::raw('sum(characters.usage_count) as usage_count'))->groupBy('standard_characters.id')->get();
 
-        foreach ($standardUsages as $su) {
-            foreach($standardCharacters as $sc){
-                if ($sc->id == $su->id){
-                    $sc->usage_count = $su->usage_count;
-                    break;
-                }
-            }
-        }
+        // foreach ($standardUsages as $su) {
+        //     foreach($standardCharacters as $sc){
+        //         if ($sc->id == $su->id){
+        //             $sc->usage_count = $su->usage_count;
+        //             break;
+        //         }
+        //     }
+        // }
         
-        foreach($standardCharacters as $sc){
-            if (!$sc->usage_count){
-                $sc->usage_count = 0;
-            }
-        }
+        // foreach($standardCharacters as $sc){
+        //     if (!$sc->usage_count){
+        //         $sc->usage_count = 0;
+        //     }
+        // }
 
-        $standardCharacters = $standardCharacters->toArray();
+        // $standardCharacters = $standardCharacters->toArray();
 
-        $userCharacters = Character::where('standard', '=', 0)
-            ->whereRaw('username LIKE CONCAT("%", owner_name)')
-            ->get();
-        $userUsages = DB::table('characters as A')->join('characters as B', 'A.name', '=', 'B.name')->where('A.standard','=',0)->whereRaw('A.username like concat("%", A.owner_name)')->where('A.username','=','B.username')->select('A.id as id',DB::raw('sum(B.usage_count) as usage_count'))->groupBy('A.id')->get();
-        foreach ($userUsages as $uu) {
-            foreach ($userCharacters as $uc){
-                if ($uc->id == $uu->id){
-                    $uc->usage_count = $uu->usage_count;
-                    break;
-                }
-            }
-        }
-        $userCharacters = $userCharacters->toArray();
+        // $userCharacters = Character::where('standard', '=', 0)
+        //     ->whereRaw('username LIKE CONCAT("%", owner_name)')
+        //     ->get();
+        // $userUsages = DB::table('characters as A')->join('characters as B', 'A.name', '=', 'B.name')->where('A.standard','=',0)->whereRaw('A.username like concat("%", A.owner_name)')->where('A.username','=','B.username')->select('A.id as id',DB::raw('sum(B.usage_count) as usage_count'))->groupBy('A.id')->get();
+        // foreach ($userUsages as $uu) {
+        //     foreach ($userCharacters as $uc){
+        //         if ($uc->id == $uu->id){
+        //             $uc->usage_count = $uu->usage_count;
+        //             break;
+        //         }
+        //     }
+        // }
+        // $userCharacters = $userCharacters->toArray();
 
-        $defaultCharacters = array_merge($standardCharacters, $userCharacters);
+        // $defaultCharacters = array_merge($standardCharacters, $userCharacters);
 
-        return view('explorecharacter', ['list' => $defaultCharacters]);
+        // return view('explorecharacter', ['list' => $defaultCharacters]);
+        return view('explorecharacter');
     }
 
 }
