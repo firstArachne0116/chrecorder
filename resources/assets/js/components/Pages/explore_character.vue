@@ -16,13 +16,13 @@
                         <div v-if="searchType == 0" style="margin-left: 10px; width: 100%;">
                             <input :disabled="bSearching" class="" v-model="username" style="width: 100%;" placeholder="Please enter an author name" v-on:keyup.enter="$event.target.blur(); exploreCharacter()"/>
                             <br>
-                            <a v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" :class="{disabled: username == ''}">Go</a><br>
+                            <a :disabled="bSearching" v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" :class="{disabled: username == ''}">Go</a><br>
                         </div>
                         <a v-on:click="handleAboutTaxon()" class="btn btn-primary" style="width: 100%; margin: 10px" :class="{disabled: searchType == 1}">Find characters about taxon ...</a><br>
                         <div v-if="searchType == 1" style="margin-left: 10px; width: 100%;">
                             <input :disabled="bSearching" class="" v-model="taxonName" style="width: 100%;" placeholder="Please enter a taxon" v-on:keyup.enter="$event.target.blur(); exploreCharacter()"/>
                             <br>
-                            <a v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" :class="{disabled: taxonName == ''}">Go</a><br>
+                            <a :disabled="bSearching" v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" :class="{disabled: taxonName == ''}">Go</a><br>
                         </div>
                         <a v-on:click="handleOfStructure()" class="btn btn-primary" style="width: 100%; margin: 10px" :class="{disabled: searchType == 2}">Find characters of structure ...</a><br>
                         <div v-if="searchType == 2" style="margin-left: 10px; width: 100%;">
@@ -41,7 +41,7 @@
                                     </div>
                                 </div>
                             </tree>
-                            <a v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" :class="{disabled: (structure == '' || findCharacterByStructure)}">Go</a><br>
+                            <a :disabled="bSearching" v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" :class="{disabled: (structure == '' || findCharacterByStructure)}">Go</a><br>
                         </div>
                         <a v-on:click="handleWithCharacter()" class="btn btn-primary" style="width: 100%; margin: 10px" :class="{disabled: searchType == 3}">Find structures with character ...</a><br>
                         <div v-if="searchType == 3" style="margin-left: 10px; width: 100%;">
@@ -131,19 +131,19 @@
                                     <div style="width: 100%; text-align: left; margin-top: 6px;">post_constraint: <b> {{(characterType == 'Color' ? currentColorValue : currentNonColorValue).post_constraint}}</b></div>
                                 </div>
                             </div>
-                            <a v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" v-if="characterType != '' && characterType != null">Go</a><br>
+                            <a :disabled="bSearching" v-on:click="exploreCharacter()" class="btn btn-primary" style="width: 60%; margin: 10px" v-if="characterType != '' && characterType != null">Go</a><br>
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div v-if="characterData[searchType]" class="table-responsive" style="max-height: calc(100vh - 200px);">
                             <table class="table table-bordered cr-table">
                                 <thead>
-                                    <th v-for="(header,index) in characterData[searchType].names" :key="index" style="min-width: 100px; height: 43px; line-height: 43px; text-align: center;">{{header}}</th>
+                                    <th v-for="(header,index) in characterData[searchType].names" :key="'header'+index" style="min-width: 100px; height: 43px; line-height: 43px; text-align: center;">{{header}}</th>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(row,index) in characterData[searchType].values" :key="index">
-                                        <td v-for="(val,index) in row" :key="index" style="padding: 3px; padding-left: 10px">
-                                            {{val}}
+                                    <tr v-for="(row,index) in characterData[searchType].values" :key="'row'+index">
+                                        <td v-for="(val,index) in characterData[searchType].names" :key="'data'+index" style="padding: 3px; padding-left: 10px">
+                                            {{row[val].value}}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -470,6 +470,16 @@
     import LiquorTree from 'liquor-tree';
     
     Vue.use(LiquorTree);
+    
+    const url = 'https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/sparql';
+    function makeBaseAuth(user, pswd){ 
+        var token = user + ':' + pswd;
+        var hash = "";
+        if (btoa) {
+            hash = btoa(token);
+        }
+        return "Basic " + hash;
+    }
 
     export default {
         props: [
@@ -733,7 +743,7 @@
             onTextureTreeNodeSelected(node) {
                 var app = this;
                 app.structure = node.data.text;
-                app.exploreCharacter();
+                // app.exploreCharacter();
             },
             getColorDetailText() {
                 var app = this;
@@ -759,6 +769,21 @@
                     (app.currentNonColorValue.post_constraint ? (app.currentNonColorValue.post_constraint + ' ') : '');
                 str = str.slice(0, -1);
                 return str;
+            },
+            api(query, success) {
+                var settings = {
+                    method: 'POST',
+                    data: { 'query': query ,'format': 'json'},
+                    withCredentials: true,
+                    headers: { 'Authorization': makeBaseAuth('blazegraph', 'dDhc5XwGtg9vZWDjGb1r') },
+                    success: success,
+                    error: function error(jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR.responseText);
+                        app.bSearching = false;
+                    }
+                };
+
+                $.ajax(url, settings);
             },
             exploreCharacter() {
                 var app = this;
@@ -787,29 +812,15 @@
                                         GRAPH ?graph{
                                             ?structure :has_quality ?character.
                                         }
-                                }`;
-                        axios.post('https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/sparql', {query: query})
-                            .then(function(resp){
-                                console.log(resp.data);
-                            })
-                            .catch(function(err){
-                                console.log(err);
-                            });
-                        axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                            .then(function(resp){
-                                console.log(resp.data);
-                                let tmp = {}, values=[];
-                                tmp.names = resp.data.names;
-                                tmp.values = [];
-                                for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                    if (!values.includes(resp.data.values[i][1])){
-                                        values.push(resp.data.values[i][1]);
-                                        tmp.values.push(resp.data.values[i]);
-                                    }
-                                }
-                                app.characterData[app.searchType] = tmp;
-                                app.bSearching = false;
-                            });
+                        }`;
+                        app.api(query, data => {
+                            console.log(data);
+                            app.bSearching = false;
+                            let tmp = {};
+                            tmp.names = data.head.vars;
+                            tmp.values = data.results.bindings;
+                            app.characterData[app.searchType] = tmp;
+                        })
                         break;
                     case 1:
                         $.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term='+app.taxonName.toLowerCase().replace(' ','%20'),{},function(resp){
@@ -845,22 +856,16 @@
                                         ?part :has_quality ?iCharacter.
                                         ?iCharacter a ?character.
                                     }
-                                }`;
-                            axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                                .then(function(resp){
-                                    console.log(resp.data);
-                                    let tmp = {}, values=[];
-                                    tmp.names = resp.data.names;
-                                    tmp.values = [];
-                                    for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                        if (!values.includes(resp.data.values[i][1])){
-                                            values.push(resp.data.values[i][1]);
-                                            tmp.values.push(resp.data.values[i]);
-                                        }
-                                    }
-                                    app.characterData[app.searchType] = tmp;
-                                    app.bSearching = false;
-                                });
+                            }`;
+                            
+                            app.api(query, data => {
+                                console.log(data);
+                                app.bSearching = false;
+                                let tmp = {};
+                                tmp.names = data.head.vars;
+                                tmp.values = data.results.bindings;
+                                app.characterData[app.searchType] = tmp;
+                            })
                         });
                         break;
                     case 2:
@@ -886,22 +891,15 @@
                                             ?structure :has_quality ?icharacter.
                                             ?structure a :${app.structure.replace(' ', '_').replace('-','_')}.
                                         }
-                            }`;
-                        axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                            .then(function(resp){
-                                console.log(resp.data);
-                                let tmp = {}, values=[];
-                                tmp.names = resp.data.names;
-                                tmp.values = [];
-                                for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                    if (!values.includes(resp.data.values[i][1])){
-                                        values.push(resp.data.values[i][1]);
-                                        tmp.values.push(resp.data.values[i]);
-                                    }
-                                }
-                                app.characterData[app.searchType] = tmp;
-                                app.bSearching = false;
-                            });
+                        }`;
+                        app.api(query, data => {
+                            console.log(data);
+                            app.bSearching = false;
+                            let tmp = {};
+                            tmp.names = data.head.vars;
+                            tmp.values = data.results.bindings;
+                            app.characterData[app.searchType] = tmp;
+                        })
                         break;
                     case 3:
                         if (app.checkHaveUnit(app.characterType)){
@@ -934,81 +932,33 @@
                                         GRAPH ?graph {
                                             ?structure :has_quality ?character.
                                         }
-                                    }`;
-                            axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                                .then(function(resp){
-                                    console.log(resp.data);
-                                    for (let i = 0 ; i < resp.data.values.length ; i ++) {
-                                        resp.data.values[i][2] = parseFloat(resp.data.values[i][2].split('^^')[0].slice(1,-1));
-                                        if (app.characterType!='Number') {
-                                            resp.data.values[i][3] = resp.data.values[i][3].split('owl#')[1].slice(0, -1);
-                                            if (!eval(app.calcValue(resp.data.values[i][2],resp.data.values[i][3]) + app.compare1 + app.calcValue(app.value1,app.unit) + '&&' + app.calcValue(resp.data.values[i][2],resp.data.values[i][3]) + app.compare2 + app.calcValue(app.value2,app.unit))){
-                                            resp.data.values.splice(i, 1);
-                                            i --;
-                                        }
-                                        }
-                                        else if (!eval(resp.data.values[i][2] + app.compare1 + app.value1 + '&&' + resp.data.values[i][2] + app.compare2 + app.value2)){
-                                            resp.data.values.splice(i, 1);
-                                            i --;
-                                        }
-                                    }
-                                    app.characterData[app.searchType] = resp.data;
-                                    app.bSearching = false;
-                                });
-                        }
-                        else if (app.characterType == 'Color') {
-                            if (app.currentColorValue.negation && app.currentColorValue.negation == 'not') {
-                                query=` BASE <http://biosemantics.arizona.edu/ontologies/carex#>
-                                        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
-                                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                                        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-                                        PREFIX iao: <http://purl.obolibrary.org/obo/iao.owl#>
-                                        PREFIX dc: <http://purl.org/dc/terms/>
-                                        PREFIX obi:<http://purl.obolibrary.org/obo/obi.owl#>
-                                        PREFIX uo: <http://purl.obolibrary.org/obo/uo.owl#>
-                                        PREFIX ncbi: <https://www.ncbi.nlm.nih.gov/Taxonomy#>
-                                        PREFIX mo:<http://biosemantics.arizona.edu/ontologies/modifierlist#>
-                                        PREFIX :<http://biosemantics.arizona.edu/ontologies/carex#>
-                                        PREFIX kb:<http://biosemantics.arizona.edu/kb/carex#>
-                                        PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
-                                        PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
+                            }`;
 
-                                        select ?graph ?character ?structure
-                                        where {
-                                            GRAPH ?graph {
-                                                 ?negation a owl:NegativePropertyAssertion ;
-                                                            owl:sourceIndividual   ?structure;  
-                                                            owl:targetIndividual   ?character.    
-                                                
-                                                ${app.currentColorValue.color!='' && app.currentColorValue.color ? '?character :has_hue_value :' + app.currentColorValue.color.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.brightness!='' && app.currentColorValue.brightness ? '?character :has_brightness_value :' + app.currentColorValue.brightness.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.reflectance!='' && app.currentColorValue.reflectance ? '?character :has_reflectance_value :' + app.currentColorValue.reflectance.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.saturation!='' && app.currentColorValue.saturation ? '?character :has_saturation_value :' + app.currentColorValue.saturation.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.pattern !='' && app.currentColorValue.pattern  ? '?character :has_pattern_value :' + app.currentColorValue.pattern .replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.certainty_constraint!='' && app.currentColorValue.certainty_constraint ? '?character :has_certainty_value_modifier :' + app.currentColorValue.certainty_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.degree_constraint!='' && app.currentColorValue.degree_constraint ? '?character :has_degree_value_modifier :' + app.currentColorValue.degree_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentColorValue.pre_constraint && app.currentColorValue.pre_constraint != '' || app.currentColorValue.post_constraint && app.currentColorValue.post_constraint != '' ? '?character :has_value "' + app.getColorDetailText() + '".' : ''}
-                                            }
-                                        }`;
-                                axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                                    .then(function(resp){
-                                        console.log(resp.data);
-                                        // let tmp = {}, values=[];
-                                        // tmp.names = resp.data.names;
-                                        // tmp.values = [];
-                                        // for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                        //     if (!values.includes(resp.data.values[i][1])){
-                                        //         values.push(resp.data.values[i][1]);
-                                        //         tmp.values.push(resp.data.values[i]);
-                                        //     }
-                                        // }
-                                        app.characterData[app.searchType] = resp.data;
-                                        app.bSearching = false;
-                                    });
-                            }
-                            else {
-                                query = `   BASE <http://biosemantics.arizona.edu/ontologies/carex#>
+                            app.api(query, resp => {
+                                console.log(resp);
+                                for (let i = 0 ; i < resp.results.bindings.length ; i ++) {
+                                    resp.results.bindings[i].value.value = parseFloat(resp.results.bindings[i].value.value);
+                                    if (app.characterType!='Number') {
+                                        resp.results.bindings[i].unit.value = resp.results.bindings[i].unit.value.split('owl#')[1];
+                                        if (!eval(app.calcValue(resp.results.bindings[i].value.value,resp.results.bindings[i].unit.value) + app.compare1 + app.calcValue(app.value1,app.unit) + '&&' + app.calcValue(resp.results.bindings[i].value.value,resp.results.bindings[i].unit.value) + app.compare2 + app.calcValue(app.value2,app.unit))){
+                                        resp.results.bindings.splice(i, 1);
+                                        i --;
+                                    }
+                                    }
+                                    else if (!eval(resp.results.bindings[i].value.value + app.compare1 + app.value1 + '&&' + resp.results.bindings[i].value.value + app.compare2 + app.value2)){
+                                        resp.results.bindings.splice(i, 1);
+                                        i --;
+                                    }
+                                }
+                                app.characterData[app.searchType] = {names: resp.head.vars, values: resp.results.bindings};
+                                app.bSearching = false;
+                            })
+                        }
+                        else 
+                        {
+                            if (app.characterType == 'Color') {
+                                if (app.currentColorValue.negation && app.currentColorValue.negation == 'not') {
+                                    query=` BASE <http://biosemantics.arizona.edu/ontologies/carex#>
                                             PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
                                             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                                             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -1026,10 +976,10 @@
 
                                             select ?graph ?character ?structure
                                             where {
-                                                ?icharacter rdfs:subClassOf :perceived_color.
                                                 GRAPH ?graph {
-                                                    ?structure :has_quality ?character.
-                                                    ?character a ?icharacter.
+                                                    ?negation a owl:NegativePropertyAssertion ;
+                                                                owl:sourceIndividual   ?structure;  
+                                                                owl:targetIndividual   ?character.    
                                                     
                                                     ${app.currentColorValue.color!='' && app.currentColorValue.color ? '?character :has_hue_value :' + app.currentColorValue.color.replace(' ', '_').replace('-','_') + '.' : ''}
                                                     ${app.currentColorValue.brightness!='' && app.currentColorValue.brightness ? '?character :has_brightness_value :' + app.currentColorValue.brightness.replace(' ', '_').replace('-','_') + '.' : ''}
@@ -1040,79 +990,47 @@
                                                     ${app.currentColorValue.degree_constraint!='' && app.currentColorValue.degree_constraint ? '?character :has_degree_value_modifier :' + app.currentColorValue.degree_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
                                                     ${app.currentColorValue.pre_constraint && app.currentColorValue.pre_constraint != '' || app.currentColorValue.post_constraint && app.currentColorValue.post_constraint != '' ? '?character :has_value "' + app.getColorDetailText() + '".' : ''}
                                                 }
-                                            }`;
-                                
-                                axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                                    .then(function(resp){
-                                        console.log(resp.data);
-                                        let tmp = {}, values=[];
-                                        tmp.names = resp.data.names;
-                                        tmp.values = [];
-                                        for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                            if (!values.includes(resp.data.values[i][1])){
-                                                values.push(resp.data.values[i][1]);
-                                                tmp.values.push(resp.data.values[i]);
-                                            }
-                                        }
-                                        app.characterData[app.searchType] = tmp;
-                                        app.bSearching = false;
-                                    });
-                            }
-                        }
-                        else {
-                            if (app.currentNonColorValue.negation && app.currentNonColorValue.negation == 'not'){
-                                query=` BASE <http://biosemantics.arizona.edu/ontologies/carex#>
-                                        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
-                                        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                                        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                                        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-                                        PREFIX iao: <http://purl.obolibrary.org/obo/iao.owl#>
-                                        PREFIX dc: <http://purl.org/dc/terms/>
-                                        PREFIX obi:<http://purl.obolibrary.org/obo/obi.owl#>
-                                        PREFIX uo: <http://purl.obolibrary.org/obo/uo.owl#>
-                                        PREFIX ncbi: <https://www.ncbi.nlm.nih.gov/Taxonomy#>
-                                        PREFIX mo:<http://biosemantics.arizona.edu/ontologies/modifierlist#>
-                                        PREFIX :<http://biosemantics.arizona.edu/ontologies/carex#>
-                                        PREFIX kb:<http://biosemantics.arizona.edu/kb/carex#>
-                                        PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
-                                        PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
+                                    }`;
+                                }
+                                else {
+                                    query = `   BASE <http://biosemantics.arizona.edu/ontologies/carex#>
+                                                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+                                                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                                PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                                PREFIX iao: <http://purl.obolibrary.org/obo/iao.owl#>
+                                                PREFIX dc: <http://purl.org/dc/terms/>
+                                                PREFIX obi:<http://purl.obolibrary.org/obo/obi.owl#>
+                                                PREFIX uo: <http://purl.obolibrary.org/obo/uo.owl#>
+                                                PREFIX ncbi: <https://www.ncbi.nlm.nih.gov/Taxonomy#>
+                                                PREFIX mo:<http://biosemantics.arizona.edu/ontologies/modifierlist#>
+                                                PREFIX :<http://biosemantics.arizona.edu/ontologies/carex#>
+                                                PREFIX kb:<http://biosemantics.arizona.edu/kb/carex#>
+                                                PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
+                                                PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                        select ?graph ?character ?structure
-                                        where {
-                                            GRAPH ?graph {
-                                                ?negation a owl:NegativePropertyAssertion ;
-                                                        owl:sourceIndividual   ?structure;  
-                                                        owl:targetIndividual   ?character.
-                                                
-                                                ${app.currentNonColorValue.main_value!='' && app.currentNonColorValue.main_value ? '?character :has_value :' + app.currentNonColorValue.main_value.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentNonColorValue.certainty_constraint!='' && app.currentNonColorValue.certainty_constraint ? '?character :has_certainty_value_modifier mo:' + app.currentNonColorValue.certainty_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentNonColorValue.degree_constraint!='' && app.currentNonColorValue.degree_constraint ? '?character :has_degree_value_modifier mo:' + app.currentNonColorValue.degree_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
-                                                ${app.currentNonColorValue.pre_constraint && app.currentNonColorValue.pre_constraint != '' || app.currentNonColorValue.post_constraint && app.currentNonColorValue.post_constraint != '' ? '?character :has_value "' + app.getNonColorDetailText() + '".' : ''}
-                                            }
-                                        }`;
-                                axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                                    .then(function(resp){
-                                        console.log(resp.data);
-                                        let tmp = {}, values=[];
-                                        tmp.names = resp.data.names;
-                                        tmp.values = [];
-                                        for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                            if (!values.includes(resp.data.values[i][1])){
-                                                values.push(resp.data.values[i][1]);
-                                                tmp.values.push(resp.data.values[i]);
-                                            }
-                                        }
-                                        app.characterData[app.searchType] = tmp;
-                                        app.bSearching = false;
-                                    })
-                                    .catch(function(err){
-                                        alert('Error occured.');
-                                        console.log(err);
-                                        app.bSearching = false;
-                                    });
+                                                select ?graph ?character ?structure
+                                                where {
+                                                    ?icharacter rdfs:subClassOf :perceived_color.
+                                                    GRAPH ?graph {
+                                                        ?structure :has_quality ?character.
+                                                        ?character a ?icharacter.
+                                                        
+                                                        ${app.currentColorValue.color!='' && app.currentColorValue.color ? '?character :has_hue_value :' + app.currentColorValue.color.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.brightness!='' && app.currentColorValue.brightness ? '?character :has_brightness_value :' + app.currentColorValue.brightness.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.reflectance!='' && app.currentColorValue.reflectance ? '?character :has_reflectance_value :' + app.currentColorValue.reflectance.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.saturation!='' && app.currentColorValue.saturation ? '?character :has_saturation_value :' + app.currentColorValue.saturation.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.pattern !='' && app.currentColorValue.pattern  ? '?character :has_pattern_value :' + app.currentColorValue.pattern .replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.certainty_constraint!='' && app.currentColorValue.certainty_constraint ? '?character :has_certainty_value_modifier :' + app.currentColorValue.certainty_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.degree_constraint!='' && app.currentColorValue.degree_constraint ? '?character :has_degree_value_modifier :' + app.currentColorValue.degree_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentColorValue.pre_constraint && app.currentColorValue.pre_constraint != '' || app.currentColorValue.post_constraint && app.currentColorValue.post_constraint != '' ? '?character :has_value "' + app.getColorDetailText() + '".' : ''}
+                                                    }
+                                    }`;
+                                }
                             }
                             else {
-                                query = `   BASE <http://biosemantics.arizona.edu/ontologies/carex#>
+                                if (app.currentNonColorValue.negation && app.currentNonColorValue.negation == 'not'){
+                                    query=` BASE <http://biosemantics.arizona.edu/ontologies/carex#>
                                             PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
                                             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
                                             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -1130,38 +1048,55 @@
 
                                             select ?graph ?character ?structure
                                             where {
-                                                ?icharacter rdfs:subClassOf :perceived_${app.characterType.toLowerCase().replace(' ', '_')}.
                                                 GRAPH ?graph {
-                                                    ?structure :has_quality ?character.
-                                                    ?character a ?icharacter.
+                                                    ?negation a owl:NegativePropertyAssertion ;
+                                                            owl:sourceIndividual   ?structure;  
+                                                            owl:targetIndividual   ?character.
                                                     
                                                     ${app.currentNonColorValue.main_value!='' && app.currentNonColorValue.main_value ? '?character :has_value :' + app.currentNonColorValue.main_value.replace(' ', '_').replace('-','_') + '.' : ''}
                                                     ${app.currentNonColorValue.certainty_constraint!='' && app.currentNonColorValue.certainty_constraint ? '?character :has_certainty_value_modifier mo:' + app.currentNonColorValue.certainty_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
                                                     ${app.currentNonColorValue.degree_constraint!='' && app.currentNonColorValue.degree_constraint ? '?character :has_degree_value_modifier mo:' + app.currentNonColorValue.degree_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
                                                     ${app.currentNonColorValue.pre_constraint && app.currentNonColorValue.pre_constraint != '' || app.currentNonColorValue.post_constraint && app.currentNonColorValue.post_constraint != '' ? '?character :has_value "' + app.getNonColorDetailText() + '".' : ''}
                                                 }
-                                            }`;
-                                axios.get('http://localhost:10035/repositories/firstArachne', {params:{query: query}})
-                                    .then(function(resp){
-                                        console.log(resp.data);
-                                        let tmp = {}, values=[];
-                                        tmp.names = resp.data.names;
-                                        tmp.values = [];
-                                        for (let i = 0 ; i < resp.data.values.length ; i ++){
-                                            if (!values.includes(resp.data.values[i][1])){
-                                                values.push(resp.data.values[i][1]);
-                                                tmp.values.push(resp.data.values[i]);
-                                            }
-                                        }
-                                        app.characterData[app.searchType] = tmp;
-                                        app.bSearching = false;
-                                    })
-                                    .catch(function(err){
-                                        alert('Error occured.');
-                                        console.log(err);
-                                        app.bSearching = false;
-                                    });
+                                    }`;
+                                }
+                                else {
+                                    query = `   BASE <http://biosemantics.arizona.edu/ontologies/carex#>
+                                                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+                                                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                                                PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                                                PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                                                PREFIX iao: <http://purl.obolibrary.org/obo/iao.owl#>
+                                                PREFIX dc: <http://purl.org/dc/terms/>
+                                                PREFIX obi:<http://purl.obolibrary.org/obo/obi.owl#>
+                                                PREFIX uo: <http://purl.obolibrary.org/obo/uo.owl#>
+                                                PREFIX ncbi: <https://www.ncbi.nlm.nih.gov/Taxonomy#>
+                                                PREFIX mo:<http://biosemantics.arizona.edu/ontologies/modifierlist#>
+                                                PREFIX :<http://biosemantics.arizona.edu/ontologies/carex#>
+                                                PREFIX kb:<http://biosemantics.arizona.edu/kb/carex#>
+                                                PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
+                                                PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
+
+                                                select ?graph ?character ?structure
+                                                where {
+                                                    ?icharacter rdfs:subClassOf :perceived_${app.characterType.toLowerCase().replace(' ', '_')}.
+                                                    GRAPH ?graph {
+                                                        ?structure :has_quality ?character.
+                                                        ?character a ?icharacter.
+                                                        
+                                                        ${app.currentNonColorValue.main_value!='' && app.currentNonColorValue.main_value ? '?character :has_value :' + app.currentNonColorValue.main_value.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentNonColorValue.certainty_constraint!='' && app.currentNonColorValue.certainty_constraint ? '?character :has_certainty_value_modifier mo:' + app.currentNonColorValue.certainty_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentNonColorValue.degree_constraint!='' && app.currentNonColorValue.degree_constraint ? '?character :has_degree_value_modifier mo:' + app.currentNonColorValue.degree_constraint.replace(' ', '_').replace('-','_') + '.' : ''}
+                                                        ${app.currentNonColorValue.pre_constraint && app.currentNonColorValue.pre_constraint != '' || app.currentNonColorValue.post_constraint && app.currentNonColorValue.post_constraint != '' ? '?character :has_value "' + app.getNonColorDetailText() + '".' : ''}
+                                                    }
+                                    }`;
+                                }
                             }
+                            app.api(query, (resp) => {
+                                console.log(resp);
+                                app.characterData[app.searchType] = {names: resp.head.vars, values: resp.results.bindings};
+                                app.bSearching = false;
+                            })
                         }
                         break;
                 }

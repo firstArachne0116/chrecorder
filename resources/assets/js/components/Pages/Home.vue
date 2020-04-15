@@ -5996,23 +5996,27 @@
                     console.log('userTags', app.userTags);
                 });
 
-            var url = 'https://shark.sbs.arizona.edu:8443/bigdata/sparql';
+            var url = 'https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/sparql';
 
-            var query = 'SELECT ?s ?p ?o { ?s ?p ?o . }';
-            var settings = {
-                method: 'POST',
-                data: { 'query': query },
-                withCredentials: true,
-                headers: { 'Authorization': makeBaseAuth('blazegraph', 'dDhc5XwGtg9vZWDjGb1r') },
-                success: function success(data) {
-                    console.log(data);
-                },
-                error: function error(jqXHR, textStatus, errorThrown) {
-                    console.log(jqXHR.responseText);
-                }
-            };
+            // var query = 'SELECT ?s ?p ?o { ?s ?p ?o . }';
+            // var settings = {
+            //     method: 'POST',
+            //     data: { 'query': query ,'format': 'json'},
+            //     withCredentials: true,
+            //     headers: { 'Authorization': makeBaseAuth('blazegraph', 'dDhc5XwGtg9vZWDjGb1r') },
+            //     success: function success(data) {
+            //         console.log(data);
+            //     },
+            //     error: function error(jqXHR, textStatus, errorThrown) {
+            //         console.log(jqXHR.responseText);
+            //     }
+            // };
 
-            $.ajax(url, settings);
+            // $.ajax(url, settings);
+
+            // axios.post(url, {query: query}).then(result=>{
+            //     console.log(result);
+            // });
         },
         mounted() {
             var app = this;
