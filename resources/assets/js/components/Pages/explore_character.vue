@@ -806,7 +806,7 @@
                                 PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                                 PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                select ?graph ?character 
+                                select distinct ?graph ?character 
                                 where {
                                         ?graph dc:creator app:${app.username}.
                                         GRAPH ?graph{
@@ -848,7 +848,7 @@
                                 PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
                                 # View triples
-                                SELECT ?graph ?character
+                                SELECT distinct ?graph ?character
                                 where {
                                     GRAPH ?graph {
                                         ?sample iao:is_about ncbi:txid${id}.
@@ -885,7 +885,7 @@
                             PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                             PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                            select ?graph ?icharacter ?structure
+                            select distinct ?graph ?icharacter ?structure
                             where {
                                         GRAPH ?graph {
                                             ?structure :has_quality ?icharacter.
@@ -922,7 +922,7 @@
                                     PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                                     PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                    select ?graph ?character ?value ${app.characterType!='Number' && '?unit'}
+                                    select distinct ?graph ?character ?value ${app.characterType!='Number' && '?unit'}
                                     where {
                                         ?structure :has_quality ?character.
                                         ?character a ?str.
@@ -974,7 +974,7 @@
                                             PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                                             PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                            select ?graph ?character ?structure
+                                            select distinct ?graph ?character ?structure
                                             where {
                                                 GRAPH ?graph {
                                                     ?negation a owl:NegativePropertyAssertion ;
@@ -1009,7 +1009,7 @@
                                                 PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                                                 PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                                select ?graph ?character ?structure
+                                                select distinct ?graph ?character ?structure
                                                 where {
                                                     ?icharacter rdfs:subClassOf :perceived_color.
                                                     GRAPH ?graph {
@@ -1046,7 +1046,7 @@
                                             PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                                             PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                            select ?graph ?character ?structure
+                                            select distinct ?graph ?character ?structure
                                             where {
                                                 GRAPH ?graph {
                                                     ?negation a owl:NegativePropertyAssertion ;
@@ -1077,7 +1077,7 @@
                                                 PREFIX data:<http://biosemantics.arizona.edu/kb/data#>
                                                 PREFIX app:<http://shark.sbs.arizona.edu/chrecorder#>
 
-                                                select ?graph ?character ?structure
+                                                select distinct ?graph ?character ?structure
                                                 where {
                                                     ?icharacter rdfs:subClassOf :perceived_${app.characterType.toLowerCase().replace(' ', '_')}.
                                                     GRAPH ?graph {

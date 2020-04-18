@@ -267,26 +267,26 @@
                                         <div style="line-height: 21px;" v-html="calcSummary(row)"></div>
                                     </td>
                                     <template  v-for="value in row" v-if="value.header_id != 1">
-                                        <td :key="value.id" v-on:click.self="focusedValue(value)">
+                                        <td :key="value.id" v-on:click.self="focusedValue(value)" style="padding-left: 5px">
                                             <div v-if="checkHaveUnit(row.find(v => v.header_id == 1).value)" style="width: 80%; float:left">
                                                 <input class="td-input" v-model="value.value" v-on:focus="focusedValue(value)"
                                                 v-on:blur="saveItem($event, value)"/>
                                             </div>
                                             <div v-else style="width: 80%; float:left; text-align: center" v-on:click.self="focusedValue(value)">
-                                                <template v-for="cv in allColorValues" v-if="cv.value_id == value.id">
+                                                <div v-for="cv in allColorValues" v-if="cv.value_id == value.id" style="text-align: left" :key="cv.id">
                                                     {{colorValueText(cv)}}
-                                                    <a class="btn btn-add display-block" style="padding: 0px" v-on:click="removeEachColor(cv)" :key="cv.id">
+                                                    <a class="btn btn-add display-block" style="padding: 0px" v-on:click="removeEachColor(cv)">
                                                         <span class="glyphicon glyphicon-remove">
                                                         </span>
                                                     </a>
-                                                </template>
-                                                <template v-for="ncv in allNonColorValues" v-if="ncv.value_id == value.id">
+                                                </div>
+                                                <div v-for="ncv in allNonColorValues" v-if="ncv.value_id == value.id" style="text-align: left" :key="ncv.id">
                                                     {{nonColorValueText(ncv)}}
-                                                    <a class="btn btn-add display-block" style="padding: 0px" v-on:click="removeEachNonColor(ncv)" :key="ncv.id">
+                                                    <a class="btn btn-add display-block" style="padding: 0px" v-on:click="removeEachNonColor(ncv)">
                                                         <span class="glyphicon glyphicon-remove">
                                                         </span>
                                                     </a>
-                                                </template>
+                                                </div>
                                                 &nbsp;
                                             </div>
                                             <a style="width: 20%;" v-on:click="copyValuesToOther(value)">
@@ -2413,19 +2413,6 @@
                 console.log('characterId', characterId);
                 app.toRemoveCharacterId = characterId;
                 app.toRemoveStandardConfirmFlag = true;
-            //    axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
-            //        .then(function (resp) {
-            //            app.toRemoveCharacterId = null;
-            //            app.userCharacters = resp.data.characters;
-            //            app.headers = resp.data.headers;
-            //            app.values = resp.data.values;
-            //            if (app.userCharacters.length == 0) {
-            //                app.matrixShowFlag = false;
-            //            }
-            //            app.refreshUserCharacters();
-
-            //        });
-
             },
             confirmRemoveCharacter() {
                 var app = this;
@@ -2981,9 +2968,6 @@
                         }
 
                         if (checkFields) {
-                //    if (app.character['id']) {
-                //        delete app.character['id'];
-                //    }
                             if (app.checkHaveUnit(app.character.name)) {
                                 app.confirmMethod = true;
                             } else {
@@ -3105,7 +3089,7 @@
                                         app.character.username += ', ' + app.character.owner_name;
                                     }
                                 }
-
+        
                                 axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
                                     .then(function (resp) {
                                         app.userTags = resp.data.userTags;
@@ -3401,18 +3385,6 @@
                 }
                 app.isLoading = false;
 
-                // axios.post('/chrecorder/public/api/v1/show-tab-character/' + tagName)
-                //     .then(function (resp) {
-                //         app.isLoading = false;
-                //         app.userCharacters = resp.data.characters;
-                //         app.headers = resp.data.headers;
-                //         app.values = resp.data.values;
-                //         console.log('values', app.values);
-                //         console.log('headers', app.headers);
-                //     //    var height = $('.cr-table').height();
-                //     //    $('.table-responsive').css('height', height + 150 + 'px');
-                //         app.refreshUserCharacters();
-                //     });
             },
             hideAllCharacter() {
                 var app = this;
@@ -3426,19 +3398,6 @@
                 app.toRemoveCharacterId = characterId;
                 app.toRemoveStandardConfirmFlag = true;
 
-            //    axios.post('/chrecorder/public/api/v1/character/delete/' + app.user.id + '/' + characterId)
-            //        .then(function (resp) {
-            //            app.userCharacters = resp.data.characters;
-            //            app.headers = resp.data.headers;
-            //            app.values = resp.data.values;
-            //            app.userTags = resp.data.userTags;
-            //            app.defaultCharacters = resp.data.defaultCharacters;
-            //            if (app.userCharacters.length == 0) {
-            //                app.matrixShowFlag = false;
-            //            }
-            //            app.refreshUserCharacters();
-            //            app.refreshDefaultCharacters();
-            //        });
             },
             changeUnit(characterId, unit) {
                 var app = this;
@@ -4205,13 +4164,7 @@
                 var app = this;
 
                 arrayColorValues.sort((a, b) => (!app.checkAllowRange(a, b) && a.colored > b.colored) ? 1 : -1);
-                // arrayColorValues.sort((a, b) => (a.brightness&&a.brightness!='')?((a.brightness == 'dark') ? 1 : -1):0);
-                // arrayColorValues.sort((a, b) => (a.brightness&&a.brightness!='')?((a.brightness == 'medium') ? -1 : 1):0);
-                // arrayColorValues.sort((a, b) => (a.brightness&&a.brightness!='')?((a.brightness == 'light') ? -1 : 1):0);
-                // arrayColorValues.sort((a, b) => (a.brightness&&a.brightness!='')?((a.brightness == 'bright') ? -1 : 1):0);
-                // arrayColorValues.sort((a, b) => (a.saturation != '' && a.saturation != null) ? -1 : 1);
-            //    arrayColorValues.sort((a, b) => (a.colored.split(' ').length > b.colored.split(' ').length) ? -1 : 1);
-
+                
                 arrayColorValues.sort(function (x, y) {
                     return x.colored == 'white' ? -1 : y.colored == 'white' ? 1 : 0;
                 });
@@ -4314,44 +4267,33 @@
                         } else {
                             alert('Error occurred while exporting data!');
                         }
-
                     });
                 axios.post('/chrecorder/public/api/v1/export-description-csv',
-                        {
-                            userCharacters: app.userCharacters,
-                            values: app.values,
-                            userTags: app.userTags,
-                            headers: app.headers,
-                            taxon: app.taxonName
-                        })
-                        .then(function(resp) {
-                            if (resp.data.is_success == 1) {
-                                window.location.href = resp.data.doc_url;
-                            } else {
-                                alert('Error occurred while exporting csv file!');
-                            }
-                        });
-                $.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=taxonomy&term='+app.taxonName.toLowerCase().replace(' ','%20'),{},function(resp){
-
-                    let idNode = resp.getElementsByTagName("Id")[0];
-
-                    let id = idNode ? idNode.childNodes[0].nodeValue : "unknown";
-
-                    axios.post('/chrecorder/public/api/v1/export-description-trig',
                     {
-                        id:id
+                        userCharacters: app.userCharacters,
+                        values: app.values,
+                        userTags: app.userTags,
+                        headers: app.headers,
+                        taxon: app.taxonName
                     })
                     .then(function(resp) {
-                        console.log(resp.data);
                         if (resp.data.is_success == 1) {
-                            let a = document.createElement('a');
-                            a.href = resp.data.doc_url;
-                            a.download = resp.data.doc_url.split('/')[resp.data.doc_url.split('/').length - 1];
-                            a.click();
+                            window.location.href = resp.data.doc_url;
                         } else {
-                            alert('Error occurred while exporting trig file!');
+                            alert('Error occurred while exporting csv file!');
                         }
-                    });
+                });
+                axios.post('/chrecorder/public/api/v1/export-description-trig')
+                .then(function(resp) {
+                    console.log(resp.data);
+                    if (resp.data.is_success == 1) {
+                        let a = document.createElement('a');
+                        a.href = resp.data.doc_url;
+                        a.download = resp.data.doc_url.split('/')[resp.data.doc_url.split('/').length - 1];
+                        a.click();
+                    } else {
+                        alert('Error occurred while exporting trig file!');
+                    }
                 });
             },
             checkValueArray(tempArray) {
@@ -4653,22 +4595,11 @@
                         postValue['main_value'] = app.currentNonColorValue.main_value;
                         var requestBody = {};
                         if (app.currentNonColorValue['main_value'] != null && app.currentNonColorValue['main_value'] != '') {
-                            //    if (app.currentNonColorValue['main_value'].endsWith('(user defined)') && postFlag == true) {
                             console.log('a1');
                             if ((app.searchNonColorFlag == 0 || app.searchNonColorFlag ==1 && app.currentNonColorValue['main_value'] == app.defaultNonColorValue) && postFlag == true) {
+
                                 console.log('a2');
-                                //    if (app.userNonColorDefinition['main_value'] == ''
-                                //        || app.userNonColorDefinition['main_value'] == null
-                                //        || app.userNonColorDefinition['main_value'] == undefined
-                                //        || app.nonColorSampleText['main_value'] == ''
-                                //        || app.nonColorSampleText['main_value'] == null
-                                //        || app.nonColorSampleText['main_value'] == undefined
-                                //        || app.nonColorTaxon['main_value'] == ''
-                                //        || app.nonColorTaxon['main_value'] == null
-                                //        || app.nonColorTaxon['main_value'] == undefined) {
-                                //        postFlag = false;
-                                //    } else if (postFlag == true) {
-                                //        postValue['main_value'] = app.currentNonColorValue['main_value'].substr(0, app.currentNonColorValue['main_value'].length - 14);
+                                
                                 if ( !app.nonColorExistFlag ){
                                     if ( app.userNonColorDefinition['main_value']=='' || app.userNonColorDefinition['main_value'] == null || app.userNonColorDefinition['main_value'] == undefined){
                                         alert('please enter definition');
@@ -4765,32 +4696,7 @@
                                 //             });
                                 //     });
                             }
-                            // else if (app.nonColorComment['main_value'] && postFlag == true) {
-                            //     console.log('a4');
-                            //     requestBody = {
-                            //         "user": app.sharedFlag ? '' : app.user.name,
-                            //         "ontology": "carex",
-                            //         "comment": app.nonColorComment['main_value'],
-                            //         "providedBy": app.user.name,
-                            //         "exampleSentence": "",
-                            //         "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + postValue['main_value']
-                            //     };
-                            //     axios.post('http://shark.sbs.arizona.edu:8080/comment', requestBody)
-                            //         .then(function (resp) {
-                            //             console.log('shark api comment resp', resp);
-                            //             axios.post('http://shark.sbs.arizona.edu:8080/save', {
-                            //                 user: app.sharedFlag ? '' : app.user.name,
-                            //                 ontology: 'carex'
-                            //             })
-                            //                 .then(function (resp) {
-                            //                     console.log('save api resp', resp);
-                            //                 });
-                            //         });
-
-                            // }
                         }
-
-                //    }
 
                         if (postFlag == true) {
                             console.log('a6');
@@ -4802,14 +4708,8 @@
                                     app.postList = resp.data.postList;
                                     app.nonColorDetails = resp.data.nonColorDetails;
                                     app.allNonColorValues = resp.data.allNonColorValues;
-                                    //    app.currentNonColorValue = {
-                                    //        detailsFlag: null,
-                                    //        value_id: app.currentNonColorValue.value_id,
-                                    //        placeholderName: app.currentNonColorValue.placeholderName
-                                    //    };
                                     app.currentNonColorValue.detailsFlag = null;
-                                //    app.currentNonColorValue.value_id = app.currentNonColorValue.value_id;
-                                //    app.currentNonColorValue.placeholderName = app.currentNonColorValue.placeholderName;
+
                                     if (newFlag == false) {
                                         app.nonColorDetailsFlag = false;
                                     } else {
@@ -5995,28 +5895,6 @@
                     if (app.userTags[0])app.showTableForTab(app.userTags[0].tag_name);
                     console.log('userTags', app.userTags);
                 });
-
-            var url = 'https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/sparql';
-
-            // var query = 'SELECT ?s ?p ?o { ?s ?p ?o . }';
-            // var settings = {
-            //     method: 'POST',
-            //     data: { 'query': query ,'format': 'json'},
-            //     withCredentials: true,
-            //     headers: { 'Authorization': makeBaseAuth('blazegraph', 'dDhc5XwGtg9vZWDjGb1r') },
-            //     success: function success(data) {
-            //         console.log(data);
-            //     },
-            //     error: function error(jqXHR, textStatus, errorThrown) {
-            //         console.log(jqXHR.responseText);
-            //     }
-            // };
-
-            // $.ajax(url, settings);
-
-            // axios.post(url, {query: query}).then(result=>{
-            //     console.log(result);
-            // });
         },
         mounted() {
             var app = this;

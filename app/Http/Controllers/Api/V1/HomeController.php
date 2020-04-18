@@ -15,6 +15,8 @@ use App\Value;
 use App\ColorDetails;
 use App\NonColorDetails;
 use DB;
+use GuzzleHttp\Client;
+use GuzzleHttp\Promise;
 
 use pietercolpaert\hardf\TriGWriter;
 
@@ -195,6 +197,7 @@ class HomeController extends Controller
     }
 
     public function getDefaultCharacters() {
+
         $user = User::where('id', '=', Auth::id())->first();
         $username = explode('@', $user['email'])[0];
 
@@ -995,6 +998,8 @@ class HomeController extends Controller
         }
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
         $objWriter->save($fileName . '.docx');
+
+
 
         return array(
             'is_success'    =>  1,
@@ -2100,13 +2105,18 @@ class HomeController extends Controller
         return $str.'s';
     }
 
-    public function exportDescriptionTrig(Request $request) {
+    public function getTrigDescription($userID, $taxons) {
+        $user = User::where('id', '=', $userID)->first();
+        // $txid = $request->input('id');
+        $txid = '';
+        if (array_key_exists( $user->taxon, $taxons) ){
+            $txid = $taxons[$user->taxon];
+        }
+        else {
+            $txid = $this->getTaxonID($userID);
+            $taxons[$user->taxon] = $txid;
+        }
 
-        $user = User::where('id', '=', Auth::id())->first();
-        $txid = $request->input('id');
-
-        $fileName = $user->taxon;
-        $file = fopen($fileName.".trig", "w") or die("Unable to open file!");
         $specimenName = $this->getSpecimenName($user->taxon);
 
         $writer = new TriGWriter([
@@ -2238,8 +2248,27 @@ class HomeController extends Controller
         $txt = $graph . " dc:creator app:". explode('@', $user->email)[0] . ";\n";
         $txt .= "\t:export_date \"".date("Y-m-d")."T".date("h:i:s")."\"^^xsd:dateTime.";
 
-        fwrite($file, $writer->end());
-        fwrite($file, $txt);
+        return [
+            'description' => $writer->end() . $txt,
+            'taxons' => $taxons,
+        ];
+    }
+
+    public function exportDescriptionTrig(Request $request) {
+
+        $user = User::where('id', '=', Auth::id())->first();
+
+        $fileName = $user->taxon;
+        $file = fopen($fileName.".trig", "w") or die("Unable to open file!");
+
+        $taxons=[];
+        $result = $this->getTrigDescription(Auth::id(), $taxons)['description'];
+
+        fwrite($file, $result);
+
+        // fwrite($file, $writer->end());
+        // fwrite($file, $txt);
+
 
         fclose($file);
         
@@ -2247,5 +2276,100 @@ class HomeController extends Controller
             'is_success'    =>  1,
             'doc_url'       =>  '/chrecorder/public/' . $fileName .'.trig',
         );
+    }
+
+    public function getTaxonID($userId) {
+        
+        $fetchdata = [];
+        $user = User::where('id', '=', $userId)->first();
+
+        $client = new Client(['base_uri' => 'https://eutils.ncbi.nlm.nih.gov']);
+
+        // $response = $client->request('GET', 'http://github.com');
+        // echo $response->getStatusCode();
+        // Initiate each request but do not block
+        $promises = [
+            'taxonId' => $client->getAsync('/entrez/eutils/esearch.fcgi',['query' => ['db' => 'taxonomy', 'term' => $user->taxon]]),
+        ];
+        
+        // Wait for the requests to complete; throws a ConnectException
+        // if any of the requests fail
+        $responses = Promise\unwrap($promises);
+        
+        // Wait for the requests to complete, even if some of them fail
+        $responses = Promise\settle($promises)->wait();
+        
+        // You can access each response using the key of the promise
+        $xml = $responses['taxonId']['value']->getBody()->getContents();
+
+        $xmlObject = simplexml_load_string($xml);
+
+        //Encode the SimpleXMLElement object into a JSON string.
+        $jsonString = json_encode($xmlObject);
+
+        //Convert it back into an associative array for
+        //the purposes of testing.
+        $jsonArray = json_decode($jsonString, true);
+
+        if (count($jsonArray['IdList'])){
+            return $jsonArray['IdList']['Id'];
+        }
+        else {
+            return "unkown";
+        }
+    }
+    public function test() {
+
+        $users = User::all();
+        {
+            $client = new Client(['base_uri' => 'https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/']);
+
+            $promises = [
+                'taxonId' => $client->postAsync('sparql',['form_params' => ['update' => 'DELETE { ?book ?p ?v } WHERE { ?book ?p ?v .}']]),
+            ];
+            
+            $responses = Promise\unwrap($promises);
+            
+            // Wait for the requests to complete, even if some of them fail
+            $responses = Promise\settle($promises)->wait();
+        }
+        $taxons=[];
+        foreach($users as $user) {
+            $client = new Client(['base_uri' => 'https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/']);
+
+            $result = $this->getTrigDescription($user->id, $taxons);
+            $taxons = $result['taxons'];
+            $query = 'insert data{' . $result['description'] . '}';
+            $promises = [
+                'taxonId' => $client->postAsync('sparql',['form_params' => ['update' => $query]]),
+            ];
+            
+            $responses = Promise\unwrap($promises);
+            
+            // Wait for the requests to complete, even if some of them fail
+            $responses = Promise\settle($promises)->wait();
+        }
+
+        
+        $fileName = 'ontology/carex.ttl';
+
+        $read = file_get_contents($fileName);
+
+        {
+            $client = new Client(['base_uri' => 'https://shark.sbs.arizona.edu:8443/blazegraph/namespace/kb/']);
+
+            $result = $this->getTrigDescription($user->id, $taxons);
+            $taxons = $result['taxons'];
+            $query = 'insert data{' . $read . '}';
+            $promises = [
+                'taxonId' => $client->postAsync('sparql',['form_params' => ['update' => $query]]),
+            ];
+            
+            $responses = Promise\unwrap($promises);
+            
+            // Wait for the requests to complete, even if some of them fail
+            $responses = Promise\settle($promises)->wait();
+        }
+
     }
 }

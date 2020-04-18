@@ -35,7 +35,8 @@ Route::group([
     Route::post('remove-each-non-color-details',        ['as' => 'removeEachNonColorDetails',   'uses' => 'HomeController@removeEachNonColorDetails']);
     Route::post('overwrite-value',                      ['as' => 'overwriteValue',              'uses' => 'HomeController@overwriteValue']);
     Route::post('keep-exist-value',                     ['as' => 'keepExistValue',              'uses' => 'HomeController@keepExistValue']);
-    Route::post('get-default-constraint',                ['as' => 'getDefaultConstraint',        'uses' => 'HomeController@getDefaultConstraint1']);
+    Route::post('get-default-constraint',               ['as' => 'getDefaultConstraint',        'uses' => 'HomeController@getDefaultConstraint1']);
+    Route::get('graphTest',                             ['as' => 'graphTest',                   'uses' => 'HomeController@test']);
 
     Route::group([
         'prefix' => '/character',
