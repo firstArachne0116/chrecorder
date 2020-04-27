@@ -1872,8 +1872,8 @@ class HomeController extends Controller
 
     }
 
-    public function getCharacterNameById() {
-        $user = User::where('id', '=', Auth::id())->first();
+    public function getCharacterNameById($userID) {
+        $user = User::where('id', '=', $userID)->first();
         $username = explode('@', $user->email)[0];
 
         $characters = Character::where('owner_name', '=', $username)->get();
@@ -1887,8 +1887,8 @@ class HomeController extends Controller
         return $returenCharacters;
     }
 
-    public function getColorDetailsById() {
-        $valueIds = Value::join('headers', 'headers.id', '=', 'values.header_id')->where('headers.user_id', '=', Auth::id())->select('values.id')->get();
+    public function getColorDetailsById($userID) {
+        $valueIds = Value::join('headers', 'headers.id', '=', 'values.header_id')->where('headers.user_id', '=', $userID)->select('values.id')->get();
         $ids = [];
         $returnDetails = [];
         foreach($valueIds as $value){
@@ -1902,8 +1902,8 @@ class HomeController extends Controller
         return $returnDetails;
     }
 
-    public function getNonColorDetailsById() {
-        $valueIds = Value::join('headers', 'headers.id', '=', 'values.header_id')->where('headers.user_id', '=', Auth::id())->select('values.id')->get();
+    public function getNonColorDetailsById($userID) {
+        $valueIds = Value::join('headers', 'headers.id', '=', 'values.header_id')->where('headers.user_id', '=', $userID)->select('values.id')->get();
         $ids = [];
         $returnDetails = [];
         foreach($valueIds as $value){
@@ -2145,9 +2145,9 @@ class HomeController extends Controller
         
         $headers = $this->getHeaders();
         $values = $this->getValuesByCharacter();
-        $colDetails = $this->getColorDetailsById();
-        $nonColDetails = $this->getNonColorDetailsById();
-        $characterName = $this->getCharacterNameById();
+        $colDetails = $this->getColorDetailsById($userID);
+        $nonColDetails = $this->getNonColorDetailsById($userID);
+        $characterName = $this->getCharacterNameById($userID);
 
 
         $index = 1;
